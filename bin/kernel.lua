@@ -10,7 +10,6 @@ local function dumpLogs()
   f.close()
 end
 
-
 local function main()
   local processes = {}
   local selectedProcessID = 0
@@ -20,7 +19,6 @@ local function main()
   local wm = {}
   local w, h = term.getSize()
   local titlebarID = 0
-  local textbox = require('.bin.lib.textbox')
 
   local resizeStartX
   local resizeStartY
