@@ -1,5 +1,4 @@
-# ZWM Todo List  
-Listed from most important to least.
+# ZWM Todo List 
 
 ## Bugs
 1. Program doesn't stay selected after choosing it in the titlebar
@@ -9,3 +8,5 @@ Listed from most important to least.
 3. Backgrounds
 4. Shutdown, reboot and sleep options on menu
 5. CTRL+Shift+Delete (opt on mac)
+6. Login UI with multiple users
+7. Make systemmamager program for login, titlebar etc
