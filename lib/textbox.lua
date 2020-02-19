@@ -4,18 +4,16 @@ local function newTextbox(x, y, w, rchar)
     win.setBackgroundColor(colors.gray)
     win.clear()
     win.setTextColor(colors.lightGray)
-
-    local obj = {
-
-    }
-
+  
+    local obj = {}
+    
     obj.select = function()
         term.redirect(win)
         local input = read(rchar)
         term.redirect(prevTerm)
         return input
     end
-
+  
     return obj
 end
 

@@ -70,7 +70,7 @@ local function main()
         end
         term.write("\31")
         if proc == selectedProcess then
-          term.setTextColor(theme.window.maximaze)
+          term.setTextColor(theme.window.maximize) 
         else
           term.setTextColor(theme.window.titlebar.text)
         end

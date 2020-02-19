@@ -1,13 +1,18 @@
 local selectedID = 0
 local procList
 
+local util = require("/lib/util")
+local file = util.loadModule("file")
+local theme = file.readTable("/etc/colors.cfg")
+local wm = _G.wm
+
 local function draw()
   local w, h = term.getSize()
-  term.setBackgroundColor(colors.white)
+  term.setBackgroundColor(theme.main.backgroundPrimary)
   term.clear()
-  term.setTextColor(colors.white)
+  term.setTextColor(theme.main.textSelected)
   term.setCursorPos(2,1)
-  term.setBackgroundColor(colors.gray)
+  term.setBackgroundColor(theme.main.backgroundSecondary)
   term.clearLine()
   term.write("New task")
   term.setCursorPos(2,2)
@@ -16,13 +21,13 @@ local function draw()
   term.setCursorPos(7, 2)
   term.write("Name")
   procList = wm.listProcesses()
-  term.setTextColor(colors.gray)
+  term.setTextColor(theme.main.text)
   local c = 3
   for i, v in pairs(procList) do
-    term.setBackgroundColor(colors.white)
+    term.setBackgroundColor(theme.main.backgroundPrimary)
     term.setCursorPos(2, c)
     if selectedID == i then
-      term.setBackgroundColor(colors.lightGray)
+      term.setBackgroundColor(theme.main.textSecondary)
       term.clearLine()
     end
     term.write(i)
@@ -52,31 +57,14 @@ while true do
       end
       if x > 1 and x < 7 and y == 1 then
         wm.selectProcess(wm.createProcess(function()
-          local function newTextbox(x, y, w, rchar)
-            local prevTerm = term.current()
-            local win = window.create(prevTerm, x, y, w, 1)
-            win.setBackgroundColor(colors.gray)
-            win.clear()
-            win.setTextColor(colors.lightGray)
-          
-            local obj = {}
-            
-            obj.select = function()
-              term.redirect(win)
-              local input = read(rchar)
-              term.redirect(prevTerm)
-              return input
-            end
-          
-            return obj
-          end
+          local textbox = require("/lib/textbox")
           local w, h = term.getSize()
           term.setBackgroundColor(colors.white)
           term.clear()
           term.setCursorPos(2,2)
           term.setTextColor(colors.gray)
           term.write("Enter program path")
-          local box = newTextbox(2, 4, w - 2)
+          local box = textbox.new(2, 4, w - 2)
           term.setCursorPos(2,6)
           term.setBackgroundColor(colors.gray)
           term.setTextColor(colors.lightGray)
