@@ -5,6 +5,7 @@ local ok, err = pcall(function()
   local procList
 
   local util = require("/lib/util")
+  local nfte = require("/lib/nfte")
   local file = util.loadModule("file")
   local theme = file.readTable("/etc/colors.cfg")
   local wm = _G.wm
@@ -30,14 +31,14 @@ local ok, err = pcall(function()
 
     for i, v in pairs(procList) do
       if not table.contains(hiddenNames, v.title) then
+        local x, y = term.getCursorPos()
+        v.startX = x
         if v == wm.getSelectedProcess() then
           term.setTextColor(theme.menu.text)
         else
           term.setTextColor(theme.menu.textSecondary)
         end
         local ins = v
-        local x, y = term.getCursorPos()
-        v.startX = x
         term.write(v.title .. " ")
         local x, y = term.getCursorPos()
         v.endX = x

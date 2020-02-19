@@ -11,3 +11,4 @@
 6. Login UI with multiple users
 7. New shell (linux-like)
 8. Docs for wm api
+9. Move window actions to the left

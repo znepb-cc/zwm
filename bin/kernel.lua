@@ -10,6 +10,23 @@ local function dumpLogs()
   f.close()
 end
 
+local function loadtable(path)
+  local file = fs.open(path, "r")
+  local content = textutils.unserialize(file.readAll())
+  file.close()
+  return content
+end
+
+print("Welcome to zwm!")
+
+print("loading package list...")
+local packageDirs = loadtable("/boot/package.path")
+for i, v in pairs(packageDirs) do
+    package.path = package.path .. ";" .. v
+end
+_G.package = package
+print(package.path)
+
 local function main()
   local processes = {}
   local selectedProcessID = 0
@@ -26,7 +43,7 @@ local function main()
   local resizeStartH
   local mvmtX = nil
 
-  local util = require("/lib/util")
+  local util = require("util")
   local file = util.loadModule("file")
   local theme = file.readTable("/etc/colors.cfg")
 
@@ -58,7 +75,7 @@ local function main()
         else
           paintutils.drawLine(1, 2, w, 2, theme.window.titlebar.background)
         end
-        term.setCursorPos(1, 2)
+        term.setCursorPos(math.floor((w - string.len(proc.title) / 2) / 2), 2)
         term.setTextColor(theme.window.titlebar.text)
         term.write(proc.title)
 
@@ -68,19 +85,19 @@ local function main()
         else
           term.setTextColor(theme.window.titlebar.text)
         end
-        term.write("\31")
+        term.write("\7")
         if proc == selectedProcess then
           term.setTextColor(theme.window.maximize) 
         else
           term.setTextColor(theme.window.titlebar.text)
         end
-        term.write("-")
+        term.write("\7")
         if proc == selectedProcess then
           term.setTextColor(theme.window.close)
         else
           term.setTextColor(theme.window.titlebar.text)
         end
-        term.write("\215")
+        term.write("\7")
       else
         proc.window.reposition(proc.x, proc.y + 1, proc.w, proc.h)
         if proc == selectedProcess then
@@ -88,7 +105,7 @@ local function main()
         else
           paintutils.drawLine(proc.x, proc.y, proc.x + proc.w - 1, proc.y, theme.window.titlebar.background)
         end
-        term.setCursorPos(proc.x, proc.y)
+        term.setCursorPos(proc.x + math.floor((proc.w - string.len(proc.title)) / 2), proc.y)
         term.setTextColor(theme.window.titlebar.text)
         term.write(proc.title)
 
@@ -98,19 +115,19 @@ local function main()
         else
           term.setTextColor(theme.window.titlebar.text)
         end
-        term.write("\31")
+        term.write("\7")
         if proc == selectedProcess then
           term.setTextColor(theme.window.maximize)
         else
           term.setTextColor(theme.window.titlebar.text)
         end
-        term.write("+")
+        term.write("\7")
         if proc == selectedProcess then
           term.setTextColor(theme.window.close)
         else
           term.setTextColor(theme.window.titlebar.text)
         end
-        term.write("\215")
+        term.write("\7")
       end
 
       term.redirect(proc.window)
@@ -221,7 +238,8 @@ local function main()
       title = settings.title,
       showTitlebar = settings.showTitlebar,
       maximazed = settings.maximazed,
-      minimized = settings.minimized
+      minimized = settings.minimized,
+      icon = settings.icon
     }
 
     local newTable = table
@@ -242,7 +260,8 @@ local function main()
         _G.table = newTable
 
         os.run({
-          _G = _G
+          _G = _G,
+          package = package
         }, path)
       end
     elseif type(path) == "function" then
@@ -447,18 +466,20 @@ local ok, err = xpcall(main, function(err)
   term.setCursorPos(1, 1)
   term.setTextColor(colors.white)
   print("Fatal System Error:", err)
+  --[[
   local traceback = {debug.traceback()}
   local w, h = term.getSize()
   for i, v in pairs(traceback) do
     local x, y = term.getCursorPos()
-    if y == h - 1 then
-      write("...")
-    elseif y < h - 1 then
+    if i >= h - 2 then
+      print("...")
+      break
+    else
       print(v)
     end
   end
   term.setCursorPos(1, 19)
-  read()
+  read()]]
 
   dumpLogs()
 end)

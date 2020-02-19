@@ -16,7 +16,8 @@ local applications = {
       x = 2,
       y = 3,
       width = 20,
-      height = 10
+      height = 10,
+      icon = "/bin/img/titlebar/shell.nft"
     }
   }
 }
