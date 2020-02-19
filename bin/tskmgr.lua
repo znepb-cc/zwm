@@ -8,11 +8,11 @@ local wm = _G.wm
 
 local function draw()
   local w, h = term.getSize()
-  term.setBackgroundColor(theme.main.backgroundPrimary)
+  term.setBackgroundColor(theme.main.background)
   term.clear()
-  term.setTextColor(theme.main.textSelected)
+  term.setTextColor(theme.menu.text)
   term.setCursorPos(2,1)
-  term.setBackgroundColor(theme.main.backgroundSecondary)
+  term.setBackgroundColor(theme.menu.background)
   term.clearLine()
   term.write("New task")
   term.setCursorPos(2,2)
@@ -24,10 +24,10 @@ local function draw()
   term.setTextColor(theme.main.text)
   local c = 3
   for i, v in pairs(procList) do
-    term.setBackgroundColor(theme.main.backgroundPrimary)
+    term.setBackgroundColor(theme.main.background)
     term.setCursorPos(2, c)
     if selectedID == i then
-      term.setBackgroundColor(theme.main.textSecondary)
+      term.setBackgroundColor(theme.main.backgroundSecondary)
       term.clearLine()
     end
     term.write(i)

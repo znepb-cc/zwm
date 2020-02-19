@@ -16,25 +16,24 @@ local ok, err = pcall(function()
   local function draw()
     procList = wm.listProcesses()
 
-    term.setBackgroundColor(theme.main.backgroundSecondary)
+    term.setBackgroundColor(theme.menu.background)
     term.clear()
     term.setCursorPos(1,1)
-    term.setTextColor(theme.main.textSecondary)
+    term.setTextColor(theme.menu.textSecondary)
     if menuPID and procList[menuPID] then
-      term.setBackgroundColor(theme.main.backgroundSecondary)
-      term.setTextColor(theme.main.textSelected)
+      term.setBackgroundColor(theme.menu.background)
+      term.setTextColor(theme.menu.text)
     else
       menuPID = nil
     end
     term.write("@ ")
-    term.setTextColor(theme.main.textSecondary)
 
     for i, v in pairs(procList) do
       if not table.contains(hiddenNames, v.title) then
         if v == wm.getSelectedProcess() then
-          term.setTextColor(theme.main.textSelected)
+          term.setTextColor(theme.menu.text)
         else
-          term.setTextColor(theme.main.textSecondary)
+          term.setTextColor(theme.menu.textSecondary)
         end
         local ins = v
         local x, y = term.getCursorPos()

@@ -27,9 +27,9 @@ local theme = file.readTable("/etc/colors.cfg")
 local wm = _G.wm
 
 local function draw()
-  term.setBackgroundColor(theme.main.backgroundSecondary)
+  term.setBackgroundColor(theme.menu.background)
   term.clear()
-  term.setTextColor(theme.main.textSelected)
+  term.setTextColor(theme.menu.text)
   for i, v in pairs(applications) do
     print(v.title)
   end

@@ -120,7 +120,7 @@ local function main()
 
   local function drawProcesses()
     term.redirect(native)
-    term.setBackgroundColor(theme.main.background)
+    term.setBackgroundColor(theme.desktop.background)
     term.clear()
     term.setCursorPos(1,5)
     if selectedProcess.minimized == true then
