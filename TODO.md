@@ -9,5 +9,5 @@
 4. Shutdown, reboot and sleep options on menu
 5. CTRL+Shift+Delete (opt on mac)
 6. Login UI with multiple users
-7. New shell 
-8. Reformat colors.cfg
+7. New shell (linux-like)
+8. Docs for wm api
