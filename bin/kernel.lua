@@ -26,6 +26,10 @@ local function main()
   local resizeStartH
   local mvmtX = nil
 
+  local util = require("/lib/util")
+  local file = util.loadModule("file")
+  local theme = file.readTable("/etc/colors.cfg")
+
   local top = 0
 
   local function updateProcesses()
@@ -50,61 +54,61 @@ local function main()
       if proc.maximazed then
         proc.window.reposition(1, 3, w, h - 2)
         if proc == selectedProcess then
-          paintutils.drawLine(1, 2, w, 2, colors.lightBlue)
+          paintutils.drawLine(1, 2, w, 2, theme.window.titlebar.backgroundSelected)
         else
-          paintutils.drawLine(1, 2, w, 2, colors.lightGray)
+          paintutils.drawLine(1, 2, w, 2, theme.window.titlebar.background)
         end
         term.setCursorPos(1, 2)
-        term.setTextColor(colors.gray)
+        term.setTextColor(theme.window.titlebar.text)
         term.write(proc.title)
 
         term.setCursorPos(w - 2, 2)
         if proc == selectedProcess then
-          term.setTextColor(colors.lime)
+          term.setTextColor(theme.window.minimize)
         else
-          term.setTextColor(colors.gray)
+          term.setTextColor(theme.window.titlebar.text)
         end
         term.write("\31")
         if proc == selectedProcess then
-          term.setTextColor(colors.yellow)
+          term.setTextColor(theme.window.maximaze)
         else
-          term.setTextColor(colors.gray)
+          term.setTextColor(theme.window.titlebar.text)
         end
         term.write("-")
         if proc == selectedProcess then
-          term.setTextColor(colors.red)
+          term.setTextColor(theme.window.close)
         else
-          term.setTextColor(colors.gray)
+          term.setTextColor(theme.window.titlebar.text)
         end
         term.write("\215")
       else
         proc.window.reposition(proc.x, proc.y + 1, proc.w, proc.h)
         if proc == selectedProcess then
-          paintutils.drawLine(proc.x, proc.y, proc.x + proc.w - 1, proc.y, colors.lightBlue)
+          paintutils.drawLine(proc.x, proc.y, proc.x + proc.w - 1, proc.y, theme.window.titlebar.backgroundSelected)
         else
-          paintutils.drawLine(proc.x, proc.y, proc.x + proc.w - 1, proc.y, colors.lightGray)
+          paintutils.drawLine(proc.x, proc.y, proc.x + proc.w - 1, proc.y, theme.window.titlebar.background)
         end
         term.setCursorPos(proc.x, proc.y)
-        term.setTextColor(colors.gray)
+        term.setTextColor(theme.window.titlebar.text)
         term.write(proc.title)
 
         term.setCursorPos(proc.x + proc.w - 3, proc.y)
         if proc == selectedProcess then
-          term.setTextColor(colors.lime)
+          term.setTextColor(theme.window.minimize)
         else
-          term.setTextColor(colors.gray)
+          term.setTextColor(theme.window.titlebar.text)
         end
         term.write("\31")
         if proc == selectedProcess then
-          term.setTextColor(colors.yellow)
+          term.setTextColor(theme.window.maximize)
         else
-          term.setTextColor(colors.gray)
+          term.setTextColor(theme.window.titlebar.text)
         end
         term.write("+")
         if proc == selectedProcess then
-          term.setTextColor(colors.red)
+          term.setTextColor(theme.window.close)
         else
-          term.setTextColor(colors.gray)
+          term.setTextColor(theme.window.titlebar.text)
         end
         term.write("\215")
       end
@@ -116,7 +120,7 @@ local function main()
 
   local function drawProcesses()
     term.redirect(native)
-    term.setBackgroundColor(colors.cyan)
+    term.setBackgroundColor(theme.main.background)
     term.clear()
     term.setCursorPos(1,5)
     if selectedProcess.minimized == true then
@@ -232,10 +236,13 @@ local function main()
 
     if type(path) == "string" then
       run = function()
+        _G.require = require
+        _G.wm = wm
+        _G.id = lastProcID
+        _G.table = newTable
+
         os.run({
-          wm = wm,
-          id = lastProcID,
-          table = newTable,
+          _G = _G
         }, path)
       end
     elseif type(path) == "function" then
@@ -340,11 +347,6 @@ local function main()
           resizeStartW = selectedProcess.w
           resizeStartH = selectedProcess.h
           log("resize start")
-          term.redirect(native)
-          term.setBackgroundColor(colors.blue)
-          term.setTextColor(colors.cyan)
-          term.setCursorPos(x, y)
-          term.write("\135")
         end
       -- Passing events (not maximazed)
       elseif not selectedProcess.maximazed and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.w - 1 and y >= selectedProcess.y and y <= selectedProcess.y + selectedProcess.h - 1 then

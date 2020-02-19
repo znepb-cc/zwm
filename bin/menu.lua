@@ -21,9 +21,15 @@ local applications = {
   }
 }
 
+local util = require("/lib/util")
+local file = util.loadModule("file")
+local theme = file.readTable("/etc/colors.cfg")
+local wm = _G.wm
+
 local function draw()
-  term.setBackgroundColor(colors.gray)
+  term.setBackgroundColor(theme.main.backgroundSecondary)
   term.clear()
+  term.setTextColor(theme.main.textSelected)
   for i, v in pairs(applications) do
     print(v.title)
   end

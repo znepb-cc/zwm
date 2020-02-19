@@ -4,27 +4,37 @@ local ok, err = pcall(function()
   local running = {}
   local procList
 
+  local util = require("/lib/util")
+  local file = util.loadModule("file")
+  local theme = file.readTable("/etc/colors.cfg")
+  local wm = _G.wm
+
+  for i, v in pairs(_G) do
+    write(i .. " ")
+  end
+
   local function draw()
     procList = wm.listProcesses()
 
-    term.setBackgroundColor(colors.gray)
+    term.setBackgroundColor(theme.main.backgroundSecondary)
     term.clear()
     term.setCursorPos(1,1)
-    term.setTextColor(colors.lightGray)
+    term.setTextColor(theme.main.textSecondary)
     if menuPID and procList[menuPID] then
-      term.setTextColor(colors.white)
+      term.setBackgroundColor(theme.main.backgroundSecondary)
+      term.setTextColor(theme.main.textSelected)
     else
       menuPID = nil
     end
     term.write("@ ")
-    term.setTextColor(colors.lightGray)
+    term.setTextColor(theme.main.textSecondary)
 
     for i, v in pairs(procList) do
       if not table.contains(hiddenNames, v.title) then
         if v == wm.getSelectedProcess() then
-          term.setTextColor(colors.white)
+          term.setTextColor(theme.main.textSelected)
         else
-          term.setTextColor(colors.lightGray)
+          term.setTextColor(theme.main.textSecondary)
         end
         local ins = v
         local x, y = term.getCursorPos()
@@ -51,7 +61,7 @@ local ok, err = pcall(function()
             wm.endProcess(menuPID)
             menuPID = nil
           else
-            menuPID = wm.createProcess("/menu.lua", {
+            menuPID = wm.createProcess("/bin/menu.lua", {
               x = 1,
               y = 2,
               width = 13,
@@ -81,4 +91,5 @@ local ok, err = pcall(function()
   end
 end)
 
-print(ok, err)
+print(tostring(ok) .. " " .. err)
+sleep(1000)
