@@ -1,4 +1,5 @@
 local logs = {}
+local w, h = term.getSize()
 
 local function log(text)
   table.insert(logs, os.epoch('utc') .. " " .. text)
@@ -27,6 +28,15 @@ end
 _G.package = package
 print(package.path)
 
+term.setBackgroundColor(colors.black)
+term.clear()
+term.setBackgroundColor(colors.cyan)
+for i = 1, h do
+    term.setCursorPos(1, i)
+    term.clearLine()
+    sleep(0.05)
+end
+
 local function main()
   local processes = {}
   local selectedProcessID = 0
@@ -36,6 +46,7 @@ local function main()
   local wm = {}
   local w, h = term.getSize()
   local titlebarID = 0
+  local keysDown = {}
 
   local resizeStartX
   local resizeStartY
@@ -46,6 +57,7 @@ local function main()
   local util = require("util")
   local file = util.loadModule("file")
   local theme = file.readTable("/etc/colors.cfg")
+  local serviceWindow = window.create(native, 1, 1, 1, 1, false)
 
   local top = 0
 
@@ -62,7 +74,7 @@ local function main()
       if proc.maximazed then
         proc.window.reposition(1, 2, w, h - 1)
       else
-        proc.window.reposition(proc.x, proc.y, proc.w, proc.h)
+        proc.window.reposition(proc.x, proc.y, proc.width, proc.height)
       end
       proc.window.redraw()
     else
@@ -79,55 +91,59 @@ local function main()
         term.setTextColor(theme.window.titlebar.text)
         term.write(proc.title)
 
-        term.setCursorPos(w - 2, 2)
-        if proc == selectedProcess then
-          term.setTextColor(theme.window.minimize)
-        else
-          term.setTextColor(theme.window.titlebar.text)
+        if not proc.disableControls then
+          term.setCursorPos(1, 2)
+          if proc == selectedProcess then
+            term.setTextColor(theme.window.close)
+          else
+            term.setTextColor(theme.window.titlebar.text)
+          end
+          term.write("\7")
+          if proc == selectedProcess then
+            term.setTextColor(theme.window.minimize) 
+          else
+            term.setTextColor(theme.window.titlebar.text)
+          end
+          term.write("\7")
+          if proc == selectedProcess then
+            term.setTextColor(theme.window.maximize)
+          else
+            term.setTextColor(theme.window.titlebar.text)
+          end
+          term.write("\7")
         end
-        term.write("\7")
-        if proc == selectedProcess then
-          term.setTextColor(theme.window.maximize) 
-        else
-          term.setTextColor(theme.window.titlebar.text)
-        end
-        term.write("\7")
-        if proc == selectedProcess then
-          term.setTextColor(theme.window.close)
-        else
-          term.setTextColor(theme.window.titlebar.text)
-        end
-        term.write("\7")
       else
-        proc.window.reposition(proc.x, proc.y + 1, proc.w, proc.h)
+        proc.window.reposition(proc.x, proc.y + 1, proc.width, proc.height)
         if proc == selectedProcess then
-          paintutils.drawLine(proc.x, proc.y, proc.x + proc.w - 1, proc.y, theme.window.titlebar.backgroundSelected)
+          paintutils.drawLine(proc.x, proc.y, proc.x + proc.width - 1, proc.y, theme.window.titlebar.backgroundSelected)
         else
-          paintutils.drawLine(proc.x, proc.y, proc.x + proc.w - 1, proc.y, theme.window.titlebar.background)
+          paintutils.drawLine(proc.x, proc.y, proc.x + proc.width - 1, proc.y, theme.window.titlebar.background)
         end
-        term.setCursorPos(proc.x + math.floor((proc.w - string.len(proc.title)) / 2), proc.y)
+        term.setCursorPos(proc.x + math.floor((proc.width - string.len(proc.title)) / 2), proc.y)
         term.setTextColor(theme.window.titlebar.text)
         term.write(proc.title)
 
-        term.setCursorPos(proc.x + proc.w - 3, proc.y)
-        if proc == selectedProcess then
-          term.setTextColor(theme.window.minimize)
-        else
-          term.setTextColor(theme.window.titlebar.text)
+        if not proc.disableControls then
+          term.setCursorPos(proc.x, proc.y)
+          if proc == selectedProcess then
+            term.setTextColor(theme.window.close)
+          else
+            term.setTextColor(theme.window.titlebar.text)
+          end
+          term.write("\7")
+          if proc == selectedProcess then
+            term.setTextColor(theme.window.minimize) 
+          else
+            term.setTextColor(theme.window.titlebar.text)
+          end
+          term.write("\7")
+          if proc == selectedProcess then
+            term.setTextColor(theme.window.maximize)
+          else
+            term.setTextColor(theme.window.titlebar.text)
+          end
+          term.write("\7")
         end
-        term.write("\7")
-        if proc == selectedProcess then
-          term.setTextColor(theme.window.maximize)
-        else
-          term.setTextColor(theme.window.titlebar.text)
-        end
-        term.write("\7")
-        if proc == selectedProcess then
-          term.setTextColor(theme.window.close)
-        else
-          term.setTextColor(theme.window.titlebar.text)
-        end
-        term.write("\7")
       end
 
       term.redirect(proc.window)
@@ -140,6 +156,13 @@ local function main()
     term.setBackgroundColor(theme.desktop.background)
     term.clear()
     term.setCursorPos(1,5)
+    
+    if selectedProcess.minimized then
+      wm.selectProcess(titlebarID or 1)
+    else
+      drawProcess(selectedProcess)
+    end
+
     if selectedProcess.minimized == true then
       selectedProcessID = 1
       selectedProcess = processes[1]
@@ -185,6 +208,10 @@ local function main()
     return selectedProcess
   end
 
+  function wm.getSelectedProcessID()
+    return selectedProcessID
+  end
+
   function wm.endProcess(pid)
     local proc = processes[pid]
     if proc then
@@ -214,6 +241,57 @@ local function main()
     return false
   end
 
+  local function isKeyDown(id)
+    for i, v in pairs(keysDown) do
+      if v == id then
+        return i
+      end
+    end
+  end
+
+  function wm.getSize()
+    return native.getSize()
+  end
+
+  function wm.changeSettings(pid, newSettings)
+    if not newSettings.title and type(path) == "string" then
+      newSettings.title = fs.getName(path)
+      if newSettings.title:sub(-4) == ".lua" then
+        newSettings.title = newSettings.title:sub(1, -5)
+      end
+    elseif type(path) ~= "string" then
+      newSettings.title = "Untitled"
+    end
+
+    if newSettings.showTitlebar == nil or newSettings.showTitlebar == true then
+      newSettings.showTitlebar = true
+    end
+
+    if not newSettings.width then
+      newSettings.width = 20
+    end
+    if not newSettings.height then
+      newSettings.height = 10
+    end
+
+    if not newSettings.x then
+      newSettings.x = math.ceil(w / 2 - (newSettings.width / 2))
+    end
+    if not newSettings.y then
+      if (newSettings.height % 2) == 0 then
+        newSettings.y = math.ceil(h / 2 - (newSettings.height / 2))
+      else
+        newSettings.y = math.ceil(h / 2 - (newSettings.height / 2)) + 1
+      end
+    end
+    local process = processes[pid]
+    newSettings.path = process.path
+    newSettings.window = process.window
+    newSettings.coroutine = process.coroutine
+    
+    processes[pid] = newSettings
+  end
+
   function wm.createProcess(path, settings)
     lastProcID  = lastProcID + 1
     if not settings.title and type(path) == "string" then
@@ -221,7 +299,7 @@ local function main()
       if settings.title:sub(-4) == ".lua" then
         settings.title = settings.title:sub(1, -5)
       end
-    else
+    elseif type(path) ~= "string" then
       settings.title = "Untitled"
     end
 
@@ -229,18 +307,25 @@ local function main()
       settings.showTitlebar = true
     end
 
-    local ins = {
-      path = path,
-      x = settings.x,
-      y = settings.y,
-      w = settings.width,
-      h = settings.height,
-      title = settings.title,
-      showTitlebar = settings.showTitlebar,
-      maximazed = settings.maximazed,
-      minimized = settings.minimized,
-      icon = settings.icon
-    }
+    if not settings.width then
+      settings.width = 20
+    end
+    if not settings.height then
+      settings.height = 10
+    end
+
+    if not settings.x then
+      settings.x = math.ceil(w / 2 - (settings.width / 2))
+    end
+    if not settings.y then
+      if (settings.height % 2) == 0 then
+        settings.y = math.ceil(h / 2 - (settings.height / 2))
+      else
+        settings.y = math.ceil(h / 2 - (settings.height / 2)) + 1
+      end
+    end
+
+    settings.path = path
 
     local newTable = table
     newTable["contains"] = contains
@@ -258,11 +343,13 @@ local function main()
         _G.wm = wm
         _G.id = lastProcID
         _G.table = newTable
+        _G.shell = shell
 
         os.run({
           _G = _G,
           package = package
         }, path)
+        sleep(1000)
       end
     elseif type(path) == "function" then
       log("running as func")
@@ -276,31 +363,70 @@ local function main()
       end
     end
 
-    ins.window = window.create(native, ins.x, ins.y, ins.w, ins.h)
-    term.redirect(ins.window)
-    ins.coroutine = coroutine.create(run)
-    coroutine.resume(ins.coroutine)
-    ins.window.redraw()
+    settings.window = window.create(native, settings.x, settings.y, settings.width, settings.height)
+    term.redirect(settings.window)
+    settings.coroutine = coroutine.create(run)
+    coroutine.resume(settings.coroutine)
+    settings.window.redraw()
 
-    table.insert(processes, lastProcID, ins)
+    table.insert(processes, lastProcID, settings)
     return lastProcID
   end
 
-  titlebarID = wm.createProcess("/bin/titlebar.lua", {
-    x = 1,
-    y = 1,
-    width = w,
-    height = 1,
-    showTitlebar = false,
-    maximazed = false;
+  function wm.createService(path)
+    lastProcID  = lastProcID + 1
+    local function run() end
+    local ins = {}
+    if type(path) == "string" then
+      run = function()
+        _G.require = require
+        _G.wm = wm
+        _G.id = lastProcID
+        _G.table = newTable
+        _G.shell = shell
+
+        os.run({
+          _G = _G,
+          package = package
+        }, path)
+        sleep(1000)
+      end
+    elseif type(path) == "function" then
+      log("running as func")
+      run = function()
+        local wm = wm
+        local id = lastProcID
+        local table = newTable
+        local textbox = textbox
+
+        path(textbox)
+      end
+    end
+
+    ins.coroutine = coroutine.create(run)
+    ins.window = serviceWindow
+    return lastProcID
+  end
+
+  local loginID = wm.createProcess("/bin/ui/login.lua", {
+    showTitlebar = true,
+    dontShowInTitlebar = true,
+    disableControls = true,
+    title = "Login",
+    height = 7,
+    y =  (h / 2) - 4
   })
-  wm.selectProcess(titlebarID)
+  wm.selectProcess(loginID)
+  wm.createService(function()
+    sleep(5)
+    os.reboot()
+  end)
 
   drawProcesses()
 
   while true do
     local e = {os.pullEvent()}
-    term.redirect(selectedProcess.window)
+
     if string.sub(e[1], 1, 6) == "mouse_" and not selectedProcess.minimized then
       local m, x, y = e[2], e[3], e[4]
       -- Resize checking
@@ -313,24 +439,24 @@ local function main()
           resizeStartH = nil
           drawProcesses()
         elseif e[1] == "mouse_drag" then
-          selectedProcess.w = (resizeStartW + (x - resizeStartX))
-          selectedProcess.h = (resizeStartH + (y - resizeStartY))
+          selectedProcess.width = (resizeStartW + (x - resizeStartX))
+          selectedProcess.height = (resizeStartH + (y - resizeStartY))
           term.redirect(selectedProcess.window)
           coroutine.resume(selectedProcess.coroutine, "term_resize")
           drawProcesses()
         end
       -- Moving windows & x and max / min buttons
-      elseif not selectedProcess.minimized and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.w - 1 and y == selectedProcess.y and e[1] == "mouse_click" and mvmtX == nil then
-        if x == selectedProcess.x + selectedProcess.w - 1 and e[1] == "mouse_click" then
+      elseif not selectedProcess.minimized and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y and e[1] == "mouse_click" and mvmtX == nil then
+        if not selectedProcess.disableControls and x == selectedProcess.x and e[1] == "mouse_click" then
           wm.endProcess(selectedProcessID)
           drawProcesses()
-        elseif x == selectedProcess.x + selectedProcess.w - 2 and e[1] == "mouse_click" then
+        elseif not selectedProcess.disableControls and x == selectedProcess.x + 1 and e[1] == "mouse_click" then
+          selectedProcess.minimized = true
+          drawProcesses()
+        elseif not selectedProcess.disableControls and x == selectedProcess.x + 2 and e[1] == "mouse_click" then
           selectedProcess.maximazed = true
           term.redirect(selectedProcess.window)
           coroutine.resume(selectedProcess.coroutine, "term_resize")
-          drawProcesses()
-        elseif x == selectedProcess.x + selectedProcess.w - 3 and e[1] == "mouse_click" then
-          selectedProcess.minimized = true
           drawProcesses()
         else
           mvmtX = x - selectedProcess.x
@@ -338,20 +464,20 @@ local function main()
         end
       -- Max window controls
       elseif selectedProcess.maximazed == true and y == 2 then 
-        if x == w and e[1] == "mouse_click" then
+        if not selectedProcess.disableControls and x == 1 and e[1] == "mouse_click" then
           wm.endProcess(selectedProcessID)
           drawProcesses()
-        elseif x == w - 1 and e[1] == "mouse_click" then
+        elseif not selectedProcess.disableControls and x == 2 and e[1] == "mouse_click" then
+          selectedProcess.minimized = true
+          drawProcesses()
+        elseif not selectedProcess.disableControls and x == 3 then
           selectedProcess.maximazed = false
           term.redirect(selectedProcess.window)
           coroutine.resume(selectedProcess.coroutine, "term_resize")
           drawProcesses()
-        elseif x == w - 2 then
-          selectedProcess.minimized = true
-          drawProcesses()
         end
       -- Window movement 
-      elseif not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x - 1 and x <= selectedProcess.x + selectedProcess.w and y >= selectedProcess.y - 1  and y <= selectedProcess.y + 1 and e[1] == "mouse_drag" or e[1] == "mouse_up" and mvmtX ~= nil then
+      elseif not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x - 1 and x <= selectedProcess.x + selectedProcess.width and y >= selectedProcess.y - 1  and y <= selectedProcess.y + 1 and e[1] == "mouse_drag" or e[1] == "mouse_up" and mvmtX ~= nil then
         if e[1] == "mouse_drag" and mvmtX then
           selectedProcess.x = x - mvmtX + 1
           selectedProcess.y = y
@@ -359,16 +485,16 @@ local function main()
         else
           mvmtX = nil
         end
-      elseif x == selectedProcess.x + selectedProcess.w - 1 and y == selectedProcess.y + selectedProcess.h and m == 2 then
+      elseif not selectedProcess.disallowResizing and x == selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y + selectedProcess.height and m == 2 then
         if e[1] == "mouse_click" then
           resizeStartX = x
           resizeStartY = y
-          resizeStartW = selectedProcess.w
-          resizeStartH = selectedProcess.h
+          resizeStartW = selectedProcess.width
+          resizeStartH = selectedProcess.height
           log("resize start")
         end
       -- Passing events (not maximazed)
-      elseif not selectedProcess.maximazed and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.w - 1 and y >= selectedProcess.y and y <= selectedProcess.y + selectedProcess.h - 1 then
+      elseif not selectedProcess.maximazed and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y >= selectedProcess.y and y <= selectedProcess.y + selectedProcess.height - 1 then
         term.redirect(selectedProcess.window)
         local pass = {}
         if selectedProcess.showTitlebar == true then
@@ -407,9 +533,9 @@ local function main()
           }
         end
         coroutine.resume(selectedProcess.coroutine, table.unpack(pass))
-      else
+      elseif e[1] == "mouse_click" then
         for i, v in pairs(processes) do
-          if x >= v.x and x <= v.x + v.w - 1 and y >= v.y and y <= v.y + v.h - 1 then
+          if x >= v.x and x <= v.x + v.width - 1 and y >= v.y and y <= v.y + v.height - 1 then
             wm.selectProcess(i)
             local pass = {}
             if selectedProcess.showTitlebar == true then
@@ -434,8 +560,37 @@ local function main()
         end
       end
     elseif e[1] == "char" or string.sub(e[1], 1, 3) == "key" or e[1] == "paste" then
+      if e[1] == "key" then
+        table.insert(keysDown, e[2])
+      elseif e[1] == "key_up" then
+        if isKeyDown(e[2]) then
+          table.remove(keysDown, isKeyDown(e[2]))
+        end
+      end
+
+      if isKeyDown(keys.leftCtrl) and isKeyDown(keys.leftShift) and isKeyDown(keys.delete) then
+        wm.selectProcess(wm.createProcess("/bin/ui/tskmgr.lua", {
+          width = 30,
+          height = 15,
+          title = "Task Manager"
+        }))
+        drawProcesses()
+      end
       term.redirect(selectedProcess.window)
       coroutine.resume(selectedProcess.coroutine, table.unpack(e))
+    elseif e[1] == "wm_fancyshutdown" then
+      term.redirect(native)
+      shell.run("/bin/ui/fancyshutdown.lua", e[2])
+    elseif e[1] == "wm_login" then
+      titlebarID = wm.createProcess("/bin/ui/titlebar.lua", {
+        x = 1,
+        y = 1,
+        width = w,
+        height = 1,
+        showTitlebar = false,
+        dontShowInTitlebar = true
+      })
+      wm.selectProcess(titlebarID)
     else
       for i, v in pairs(processes) do
         term.redirect(v.window)
@@ -444,6 +599,8 @@ local function main()
       end
       drawProcesses()
     end
+
+    -- Update windows
     term.redirect(selectedProcess.window)
     removeDeadProcesses()
     for i, v in pairs(processes) do
@@ -453,7 +610,7 @@ local function main()
       end
     end
     if selectedProcess.minimized then
-      wm.selectProcess(1)
+      wm.selectProcess(titlebarID or 1)
     else
       drawProcess(selectedProcess)
     end
@@ -461,25 +618,35 @@ local function main()
   end
 end
 
+local function split(inputstr, sep)
+  if sep == nil then
+    sep = "%s"
+  end
+  local t={}
+  for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+    table.insert(t, str)
+  end
+  return t
+end
+
 local ok, err = xpcall(main, function(err)
   term.redirect(term.native())
-  term.setCursorPos(1, 1)
+  term.setCursorPos(1, 3)
   term.setTextColor(colors.white)
+  term.clear()
   print("Fatal System Error:", err)
-  --[[
-  local traceback = {debug.traceback()}
   local w, h = term.getSize()
-  for i, v in pairs(traceback) do
-    local x, y = term.getCursorPos()
-    if i >= h - 2 then
+  local tb = split(debug.traceback(), "\n")
+  for i, v in pairs(tb) do
+    if i >= 13 then
       print("...")
-      break
+      return
     else
       print(v)
     end
   end
   term.setCursorPos(1, 19)
-  read()]]
+  read()
 
   dumpLogs()
 end)

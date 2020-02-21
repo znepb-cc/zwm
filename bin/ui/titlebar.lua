@@ -30,7 +30,7 @@ local ok, err = pcall(function()
     term.write("@ ")
 
     for i, v in pairs(procList) do
-      if not table.contains(hiddenNames, v.title) then
+      if not v.dontShowInTitlebar then
         local x, y = term.getCursorPos()
         v.startX = x
         if v == wm.getSelectedProcess() then
@@ -61,12 +61,13 @@ local ok, err = pcall(function()
             wm.endProcess(menuPID)
             menuPID = nil
           else
-            menuPID = wm.createProcess("/bin/menu.lua", {
+            menuPID = wm.createProcess("/bin/ui/menu.lua", {
               x = 1,
               y = 2,
               width = 13,
               height = 12,
-              showTitlebar = false
+              showTitlebar = false,
+              dontShowInTitlebar = true
             })
 
             wm.selectProcess(menuPID)

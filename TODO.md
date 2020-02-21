@@ -1,14 +1,9 @@
 # ZWM Todo List 
 
 ## Bugs
-1. Program doesn't stay selected after choosing it in the titlebar
+None
 ## Features
 1. Installer (non-graphical)
-2. Services
+2. Services (exist but don't work)
 3. Backgrounds
-4. Shutdown, reboot and sleep options on menu
-5. CTRL+Shift+Delete (opt on mac)
-6. Login UI with multiple users
-7. New shell (linux-like)
-8. Docs for wm api
-9. Move window actions to the left
+4. Docs for wm api

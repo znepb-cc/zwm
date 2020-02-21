@@ -56,43 +56,11 @@ while true do
         c = c + 1
       end
       if x > 1 and x < 7 and y == 1 then
-        wm.selectProcess(wm.createProcess(function()
-          local textbox = require("/lib/textbox")
-          local w, h = term.getSize()
-          term.setBackgroundColor(colors.white)
-          term.clear()
-          term.setCursorPos(2,2)
-          term.setTextColor(colors.gray)
-          term.write("Enter program path")
-          local box = textbox.new(2, 4, w - 2)
-          term.setCursorPos(2,6)
-          term.setBackgroundColor(colors.gray)
-          term.setTextColor(colors.lightGray)
-          term.write(" Run ")
-          local content = ""
-          while true do
-            local e = {os.pullEvent()}
-            if e[1] == "mouse_click" then
-              local m, x, y = e[2], e[3], e[4]
-              if x >= 2 and x <= w - 2 and y == 4 then
-                content = box.select()
-              elseif x >= 2 and x <= 7 and y == 6 then
-                wm.selectProcess(wm.createProcess(content, {
-                  x = 2,
-                  y = 3,
-                  width = 20,
-                  height = 10
-                }))
-                break
-              end
-            end
-          end
-        end, 
+        wm.selectProcess(wm.createProcess("/bin/ui/run.lua", 
         {
-          x = 2,
-          y = 3,
           width = 24,
-          height = 7
+          height = 7,
+          disallowResizing = true
         }))
       end
     end

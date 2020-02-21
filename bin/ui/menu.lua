@@ -1,23 +1,30 @@
+local tw, th = wm.getSize()
+
 local applications = {
   {
     title = "Task Manager",
-    path = "/bin/tskmgr.lua",
+    path = "/bin/ui/tskmgr.lua",
     settings = {
-      x = 2,
-      y = 3,
       width = 30,
-      height = 15
+      height = 15,
+      title = "Task Manager"
     }
   },
   {
     title = "Shell",
-    path = "/rom/programs/shell.lua",
+    path = "bin/shell.lua",
     settings = {
-      x = 2,
-      y = 3,
-      width = 20,
-      height = 10,
-      icon = "/bin/img/titlebar/shell.nft"
+      title = "Shell"
+    }
+  },
+  {
+    title = "Power",
+    path = "/bin/ui/shutdown.lua",
+    settings = {
+      height = 6,
+      showTitlebar = false,
+      dontShowInTitlebar = true,
+      title = "Power"
     }
   }
 }
