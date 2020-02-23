@@ -17,4 +17,4 @@ If you have an idea, please submit it to the Issues page. PRs welcome.
 ![2 windows and the menu](https://i.imgur.com/HgXYgZW.png)
 ![Maximized task manager](https://i.imgur.com/ludRfHG.png)
 ![Run window](https://i.imgur.com/MCwYVOF.png)
-![Shutdown and reboot menu](https://i.imgur.com/MCwYVOF.png)
+![Shutdown and reboot menu](https://i.imgur.com/iK4x16B.png)
