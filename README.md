@@ -12,7 +12,7 @@ If you have an idea, please submit it to the Issues page. PRs welcome.
 
 ## Screenshots
 
-[Imgur Collection](https://imgur.com/a/FZaOHUN)
+[Imgur Collection](https://imgur.com/a/FZaOHUN)    
 ![Login screen](https://i.imgur.com/iBsTfoK.png)
 ![2 windows and the menu](https://i.imgur.com/HgXYgZW.png)
 ![Maximized task manager](https://i.imgur.com/ludRfHG.png)
