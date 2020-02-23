@@ -3,6 +3,5 @@
 ## Bugs
 None
 ## Features
-1. Installer (non-graphical)
-2. Services (exist but don't work)
-3. Docs for wm api
+1. Services (exist but don't work)
+2. Docs for wm api
