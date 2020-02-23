@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "bin"
+		},
+		{
+			"path": "boot"
+		},
+		{
+			"path": "etc"
+		},
+		{
+			"path": "home"
+		},
+		{
+			"path": "inst"
+		},
+		{
+			"path": "lib"
+		}
+	],
+	"settings": {}
+}
