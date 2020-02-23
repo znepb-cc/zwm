@@ -1,6 +1,6 @@
 {
     release = {20, 9},
-    releaseType = "beta",
+    releaseType = "production",
     spaceRequirement = 80000,
     releaseDate = {
         m = 2,
