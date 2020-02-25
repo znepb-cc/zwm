@@ -1,6 +1,7 @@
 local ok, err = pcall(function()
   local menuPID
   local hiddenNames = {"menu", "titlebar"}
+  local w = term.getSize()
   local running = {}
   local procList
 
@@ -14,13 +15,19 @@ local ok, err = pcall(function()
     write(i .. " ")
   end
 
+  local function drawTime()
+    local time = " " .. textutils.formatTime(os.time(), false)
+    term.setTextColor(theme.menu.textSecondary)
+    term.setCursorPos(w - string.len(time) + 1, 1)
+    term.write(time)
+  end
+
   local function draw()
     procList = wm.listProcesses()
-
-    term.setBackgroundColor(theme.menu.background)
+    term.setBackgroundColor(colors.gray)
     term.clear()
+    drawTime()
     term.setCursorPos(1,1)
-    term.setTextColor(theme.menu.textSecondary)
     if menuPID and procList[menuPID] then
       term.setBackgroundColor(theme.menu.background)
       term.setTextColor(theme.menu.text)
@@ -48,48 +55,60 @@ local ok, err = pcall(function()
     end
   end
 
-  while true do
-    local e = {os.pullEvent()}
-    draw()
-    if e[1] == "mouse_click" then
-      local m, x, y = e[2], e[3], e[4]
-      if x == 1 and y == 1 then
-        if menuPID and wm.listProcesses()[menuPID] == nil then
-          menuPID = nil
-        else
-          if menuPID ~= nil then
-            wm.endProcess(menuPID)
+
+  local function event()
+    while true do
+      local e = {os.pullEvent()}
+      draw()
+      if e[1] == "mouse_click" then
+        local m, x, y = e[2], e[3], e[4]
+        if x == 1 and y == 1 then
+          if menuPID and wm.listProcesses()[menuPID] == nil then
             menuPID = nil
           else
-            menuPID = wm.createProcess("/bin/ui/menu.lua", {
-              x = 1,
-              y = 2,
-              width = 13,
-              height = 12,
-              showTitlebar = false,
-              dontShowInTitlebar = true
-            })
+            if menuPID ~= nil then
+              wm.endProcess(menuPID)
+              menuPID = nil
+            else
+              menuPID = wm.createProcess("/bin/ui/menu.lua", {
+                x = 1,
+                y = 2,
+                width = 20,
+                height = 14,
+                showTitlebar = false,
+                dontShowInTitlebar = true
+              })
 
-            wm.selectProcess(menuPID)
+              wm.selectProcess(menuPID)
+            end
           end
-        end
-      else
-        local pid
-        for i, v in pairs(running) do
-          if x >= v.startX and x <= v.endX then
-            pid = v.pid
+        else
+          local pid
+          for i, v in pairs(running) do
+            if x >= v.startX and x <= v.endX then
+              pid = v.pid
+            end
           end
-        end
 
-        if pid then
-          if procList[pid].minimized then
-            wm.unminimizeProcess(pid)
+          if pid then
+            if procList[pid].minimized then
+              wm.unminimizeProcess(pid)
+            end
+            wm.selectProcess(pid)
           end
-          wm.selectProcess(pid)
         end
       end
     end
   end
+
+  local function time()
+    while true do
+      drawTime()
+      sleep(1)
+    end
+  end
+
+  parallel.waitForAll(time, event)
 end)
 
 print(tostring(ok) .. " " .. err)

@@ -47,6 +47,17 @@ local function newTextbox(x, y, w, rchar, placeholderText, contents)
     local newContent
   
     local obj = {}
+
+    obj.redraw = function()
+        win.setBackgroundColor(colors.lightGray)
+        win.clear()
+        win.setTextColor(colors.gray)
+        win.setCursorPos(1,1)
+        win.write(newContent or contents)
+        if contents == "" and placeholderText then
+            win.write(placeholderText)
+        end
+    end
     
     obj.select = function(clear)
         if clear == true then
@@ -68,23 +79,14 @@ local function newTextbox(x, y, w, rchar, placeholderText, contents)
         if contents == "" and placeholderText then
             win.write(placeholderText)
         end
+
+        obj.redraw()
         
         return contents, goToNext
     end
 
     obj.getContent = function()
         return contents
-    end
-
-    obj.redraw = function()
-        win.setBackgroundColor(colors.lightGray)
-        win.clear()
-        win.setTextColor(colors.gray)
-        win.setCursorPos(1,1)
-        win.write(newContent or contents)
-        if contents == "" and placeholderText then
-            win.write(placeholderText)
-        end
     end
 
     obj.redraw()

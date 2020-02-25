@@ -1,5 +1,6 @@
 dump.log
 *.code-workspace
+recent.cfg
 
 # Compiled Lua sources
 luac.out

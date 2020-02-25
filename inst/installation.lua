@@ -1,10 +1,10 @@
 {
-    release = {20, 9},
-    releaseType = "production",
-    spaceRequirement = 80000,
+    release = {20, 10},
+    releaseType = "development",
+    spaceRequirement = 90000,
     releaseDate = {
         m = 2,
-        d = 23,
+        d = 24,
         y = 2020
     },
     directories = {
@@ -12,6 +12,7 @@
         "/bin/ui",
         "/boot/",
         "/etc/",
+        "/etc/menu/"
         "/home/",
         "/lib/"
     },
@@ -28,6 +29,7 @@
         "/boot/files.cfg",
         "/boot/package.path",
         "/boot/sys.path",
+        "/etc/menu/pinned.cfg",
         "/etc/accounts.cfg",
         "/etc/colors.cfg",
         "/lib/util/file.lua",
@@ -36,8 +38,10 @@
         "/lib/util/init.lua",
         "/lib/util/json.lua",
         "/lib/util/math.lua",
+        "/lib/draw.lua",
         "/lib/json.lua",
         "/lib/nfte.lua",
+        "/lib/scrollwindow.lua",
         "/lib/sha256.lua",
         "/lib/textbox.lua",
         "/startup.lua"
