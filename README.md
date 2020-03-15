@@ -1,5 +1,5 @@
 # zwm
-Window manager for ComputerCraft. (Name not final!)
+Window manager for ComputerCraft. (Name probably final, if you have ideas please sumbit them to the Naming issue)
 
 ## Installation
 Latest release:  
@@ -9,6 +9,9 @@ Latest commit:
 
 ## Contributing
 If you have an idea, please submit it to the Issues page. PRs welcome.
+
+## API Docs
+API docs are located in this repo's Wiki.
 
 ## Screenshots
 
