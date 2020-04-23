@@ -12,7 +12,7 @@
         "/bin/ui",
         "/boot/",
         "/etc/",
-        "/etc/menu/"
+        "/etc/menu/",
         "/home/",
         "/lib/"
     },
