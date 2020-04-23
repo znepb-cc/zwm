@@ -27,10 +27,13 @@ local function getInstallationInformation(tag)
     if not inst then
         printError(("Could not fetch installation information for branch %s."):format(tag))
         return
-    else 
-        inst = textutils.unserialize(inst)
+    else
+        instData = textutils.unserialize(inst)
     end
-    return inst
+    if not instData then
+        error("Error parsing installing information")
+    end
+    return instData
 end
 
 local function getLatestTag()
@@ -49,7 +52,6 @@ local function install(inst, release)
     print(("Release type: %s"):format(inst.releaseType))
     write(("Required space: %d"):format(inst.spaceRequirement))
     if fs.getFreeSpace("/") < inst.spaceRequirement then
-        print()
         printError("Unable to install zwm. Reason: Not enough space")
     else
         print(" (OK)")
@@ -62,13 +64,13 @@ local function install(inst, release)
         print("Installation canceled.")
     else
         print("Creating directories...")
-        for i, v in pairs(inst.directories) do 
+        for i, v in pairs(inst.directories) do
             print(("Creating: %s"):format(v))
             fs.makeDir(v)
         end
 
         print("Downloading files...")
-        for i, v in pairs(inst.files) do 
+        for i, v in pairs(inst.files) do
             print(("Downloading: %s"):format(v))
             downloadFile(v)
         end
