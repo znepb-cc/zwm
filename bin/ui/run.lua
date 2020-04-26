@@ -1,6 +1,9 @@
 local textbox = require("/lib/textbox")
 local w, h = term.getSize()
 local box = textbox.new(2, 4, w - 2)
+local util = require("util")
+local file = util.loadModule("file")
+local theme = file.readTable("/etc/colors.cfg")
 
 local function draw()
     local w, h = term.getSize()
@@ -15,10 +18,10 @@ local function draw()
     term.setTextColor(colors.gray)
     term.write(" Run ")
 
-    local foregroundColor = colors.lightGray
+    local foregroundColor = theme.window.titlebar.background
 
     if wm.getSelectedProcessID() == id then
-        foregroundColor = colors.lightBlue
+        foregroundColor = theme.window.titlebar.backgroundSelected
     end
 
     for i = 1, h - 1 do

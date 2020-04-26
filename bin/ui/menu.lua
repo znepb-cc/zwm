@@ -12,9 +12,9 @@ local draw = require("/lib/draw")
 local file = util.loadModule("file")
 local theme = file.readTable("/etc/colors.cfg")
 
-local search = textbox.new(3, h - 1, w - 7, nil, "Search")
-local searchWindow = scroll.new(2, 2, w - 3, h - 4, {}, colors.gray, false)
-local pinnedWindow = scroll.new(2, 2, w - 3, h - 4, {}, colors.gray, true)
+local search = textbox.new(3, h - 1, w - 7, nil, "Search", nil, theme.userInput.background, theme.userInput.text)
+local searchWindow = scroll.new(2, 2, w - 3, h - 4, {}, theme.menu.background, false)
+local pinnedWindow = scroll.new(2, 2, w - 3, h - 4, {}, theme.menu.background, true)
 local wm = _G.wm
 local query
 local searchResults = {}
@@ -80,12 +80,12 @@ local function drawUI()
     pinnedWindow.setElements({})
     
     local pos = 1
-    pinnedWindow.addElement(scroll.createElement(2, pos, "Pinned", colors.white, colors.gray, none))
+    pinnedWindow.addElement(scroll.createElement(2, pos, "Pinned", colors.white, theme.menu.background, none))
     pos = pos + 1
-    pinnedWindow.addElement(scroll.createElement(1, pos, string.rep("\140", sw), colors.lightGray, colors.gray, none))
+    pinnedWindow.addElement(scroll.createElement(1, pos, string.rep("\140", sw), colors.lightGray, theme.menu.background, none))
     pos = pos + 1
     for i, v in pairs(pinned) do
-      pinnedWindow.addElement(scroll.createElement(2, pos, draw.overflow(v.title, sw), colors.white, colors.gray, function()
+      pinnedWindow.addElement(scroll.createElement(2, pos, draw.overflow(v.title, sw), colors.white, theme.menu.background, function()
         wm.endProcess(id)
         wm.selectProcess(wm.createProcess(v.path, v.insettings))
         cleanRecent(v.path)
@@ -104,12 +104,12 @@ local function drawUI()
     end
 
     pos = pos + 1
-    pinnedWindow.addElement(scroll.createElement(2, pos, "Recent", colors.white, colors.gray, none))
+    pinnedWindow.addElement(scroll.createElement(2, pos, "Recent", colors.white, theme.menu.background, none))
     pos = pos + 1
-    pinnedWindow.addElement(scroll.createElement(1, pos, string.rep("\140", sw), colors.lightGray, colors.gray, none))
+    pinnedWindow.addElement(scroll.createElement(1, pos, string.rep("\140", sw), colors.lightGray, theme.menu.background, none))
     pos = pos + 1
     for i, v in pairs(recent) do
-      pinnedWindow.addElement(scroll.createElement(2, pos, draw.overflow(v.name, sw), colors.white, colors.gray, function()
+      pinnedWindow.addElement(scroll.createElement(2, pos, draw.overflow(v.name, sw), colors.white, theme.menu.background, function()
         wm.endProcess(id)
         wm.selectProcess(wm.createProcess(v.path, {}))
         cleanRecent(v.path)
@@ -123,7 +123,7 @@ local function drawUI()
       pos = pos + 1
     end
     if #recent == 0 then
-      pinnedWindow.addElement(scroll.createElement(2, pos, draw.overflow("No recent apps", sw), colors.white, colors.gray, none))
+      pinnedWindow.addElement(scroll.createElement(2, pos, draw.overflow("No recent apps", sw), colors.white, theme.menu.background, none))
     end
     pinnedWindow.redraw()
   else
@@ -133,11 +133,11 @@ local function drawUI()
     pinnedWindow.setVisible(false)
     searchWindow.setElements({})
     if #searchResults == 0 then
-      searchWindow.addElement(scroll.createElement(math.ceil(searchWindow.getWidth() / 2 - string.len("No results") / 2), pos, "No results.", colors.lightGray, colors.gray, function() end))
+      searchWindow.addElement(scroll.createElement(math.ceil(searchWindow.getWidth() / 2 - string.len("No results") / 2), pos, "No results.", colors.lightGray, theme.menu.background, function() end))
     else
-      searchWindow.addElement(scroll.createElement(1, pos, "Found " .. #searchResults .. " results", colors.white, colors.gray, none))
+      searchWindow.addElement(scroll.createElement(1, pos, "Found " .. #searchResults .. " results", colors.white, theme.menu.background, none))
       pos = pos + 1
-      searchWindow.addElement(scroll.createElement(1, pos, string.rep("\140", sw), colors.lightGray, colors.gray, none))
+      searchWindow.addElement(scroll.createElement(1, pos, string.rep("\140", sw), colors.lightGray, theme.menu.background, none))
       pos = pos + 1
 
       for i, v in pairs(searchResults) do
@@ -153,15 +153,15 @@ local function drawUI()
           updateRecent()
         end
 
-        searchWindow.addElement(scroll.createElement(2, pos, draw.overflow(fs.getName(v), sw), colors.white, colors.gray, addFunction))
+        searchWindow.addElement(scroll.createElement(2, pos, draw.overflow(fs.getName(v), sw), colors.white, theme.menu.background, addFunction))
         pos = pos + 1
         local text = fs.getDir(v)
         if fs.getDir(v) == "" then
           text = "Root"
         end
-        searchWindow.addElement(scroll.createElement(2, pos, draw.overflow(text, sw), colors.lightGray, colors.gray, addFunction))
+        searchWindow.addElement(scroll.createElement(2, pos, draw.overflow(text, sw), colors.lightGray, theme.menu.background, addFunction))
         pos = pos + 1
-        searchWindow.addElement(scroll.createElement(2, pos, "", colors.lightGray, colors.gray, function() end))
+        searchWindow.addElement(scroll.createElement(2, pos, "", colors.lightGray, theme.menu.background, function() end))
         pos = pos + 1
       end
       searchWindow.removeElement(#searchWindow.getElements())
@@ -174,14 +174,14 @@ local function drawUI()
   term.setCursorPos(w - 2, h - 1)
   term.write("O")
   term.setCursorPos(w - 1, h - 2)
-  term.setBackgroundColor(colors.gray)
+  term.setBackgroundColor(theme.menu.background)
   draw.drawBorder(w - 2, h - 1, 1, 1, colors.red)
 
   term.setCursorPos(w, h - 1)
   search.redraw()
   term.setCursorPos(w - 1, h - 2)
-  term.setBackgroundColor(colors.gray)
-  draw.drawBorder(3, h - 1, w - 7, 1, colors.lightGray)
+  term.setBackgroundColor(theme.menu.background)
+  draw.drawBorder(3, h - 1, w - 7, 1, theme.userInput.background)
 end
 
 if not fs.exists("/etc/menu/recent.cfg") then
@@ -212,6 +212,8 @@ while true do
         drawUI()
       end
     end
+  elseif e[1] == "wm_themeupdate" then
+    theme = file.readTable("/etc/colors.cfg")
   end
   local found = searchWindow.checkEvents(e)
   pinnedWindow.checkEvents(e)

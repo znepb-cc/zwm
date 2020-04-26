@@ -103,14 +103,14 @@ end
 
 function public.parseBoolean(str)
 	if str:sub(1, 4) == "true" then
-		return true, removeWhite(str:sub(5))
+		return true, public.removeWhite(str:sub(5))
 	else
-		return false, removeWhite(str:sub(6))
+		return false, public.removeWhite(str:sub(6))
 	end
 end
 
 function public.parseNull(str)
-	return nil, removeWhite(str:sub(5))
+	return nil, public.removeWhite(str:sub(5))
 end
 
 local numChars = {['e']=true; ['E']=true; ['+']=true; ['-']=true; ['.']=true}
@@ -120,7 +120,7 @@ function public.parseNumber(str)
 		i = i + 1
 	end
 	local val = tonumber(str:sub(1, i - 1))
-	str = removeWhite(str:sub(i))
+	str = public.removeWhite(str:sub(i))
 	return val, str
 end
 
@@ -141,68 +141,68 @@ function public.parseString(str)
 
 		s = s .. next
 	end
-	return s, removeWhite(str:sub(2))
+	return s, public.removeWhite(str:sub(2))
 end
 
 function public.parseArray(str)
-	str = removeWhite(str:sub(2))
+	str = public.removeWhite(str:sub(2))
 
 	local val = {}
 	local i = 1
 	while str:sub(1, 1) ~= "]" do
 		local v = nil
-		v, str = parseValue(str)
+		v, str = public.parseValue(str)
 		val[i] = v
 		i = i + 1
-		str = removeWhite(str)
+		str = public.removeWhite(str)
 	end
-	str = removeWhite(str:sub(2))
+	str = public.removeWhite(str:sub(2))
 	return val, str
 end
 
 function public.parseObject(str)
-	str = removeWhite(str:sub(2))
+	str = public.removeWhite(str:sub(2))
 
 	local val = {}
 	while str:sub(1, 1) ~= "}" do
 		local k, v = nil, nil
-		k, v, str = parseMember(str)
+		k, v, str = public.parseMember(str)
 		val[k] = v
-		str = removeWhite(str)
+		str = public.removeWhite(str)
 	end
-	str = removeWhite(str:sub(2))
+	str = public.removeWhite(str:sub(2))
 	return val, str
 end
 
 function public.parseMember(str)
 	local k = nil
-	k, str = parseValue(str)
+	k, str = public.parseValue(str)
 	local val = nil
-	val, str = parseValue(str)
+	val, str = public.parseValue(str)
 	return k, val, str
 end
 
 function public.parseValue(str)
 	local fchar = str:sub(1, 1)
 	if fchar == "{" then
-		return parseObject(str)
+		return public.parseObject(str)
 	elseif fchar == "[" then
-		return parseArray(str)
+		return public.parseArray(str)
 	elseif tonumber(fchar) ~= nil or numChars[fchar] then
-		return parseNumber(str)
+		return public.parseNumber(str)
 	elseif str:sub(1, 4) == "true" or str:sub(1, 5) == "false" then
-		return parseBoolean(str)
+		return public.parseBoolean(str)
 	elseif fchar == "\"" then
-		return parseString(str)
+		return public.parseString(str)
 	elseif str:sub(1, 4) == "null" then
-		return parseNull(str)
+		return public.parseNull(str)
 	end
 	return nil
 end
 
 function public.decode(str)
-	str = removeWhite(str)
-	t = parseValue(str)
+	str = public.removeWhite(str)
+	t = public.parseValue(str)
 	return t
 end
 

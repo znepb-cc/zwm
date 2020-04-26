@@ -15,7 +15,6 @@ local function new(x, y, w, h, elements, backgroundColor, visible)
     local scrollFrame = window.create(current, x, y, w, h, visible)
     scrollFrame.setBackgroundColor(backgroundColor or colors.black)
     scrollFrame.clear()
-    local elements = {}
 
     local obj = {}
     local visibleElements = {}
@@ -36,6 +35,13 @@ local function new(x, y, w, h, elements, backgroundColor, visible)
     obj.getWidth = function()
         return w
     end
+    obj.resize = function(nw, nh)
+        w = nw    
+        h = nh
+    end
+    obj.scrollToTop = function()
+        scrollPos = 0
+    end
 
     obj.redraw = function()
         if visible then
@@ -44,7 +50,7 @@ local function new(x, y, w, h, elements, backgroundColor, visible)
             for id = scrollPos, scrollPos + h do
                 if elements[id + 1] then
                     local e = elements[id + 1]
-                    if e.x and e.y and e.text and e.textColor and e.backgroundColor and e.clickEvent then
+                    if e.x and e.y and e.text and e.textColor then
                         local newElement = elements[id + 1]
                         newElement.actualY = newElement.y - scrollPos
                         table.insert(visibleElements, elements[id + 1])
@@ -64,7 +70,7 @@ local function new(x, y, w, h, elements, backgroundColor, visible)
                 if elem then
                     scrollFrame.setCursorPos(elem.x, elem.actualY)
                     scrollFrame.setTextColor(elem.textColor)
-                    scrollFrame.setBackgroundColor(elem.backgroundColor)
+                    scrollFrame.setBackgroundColor(elem.backgroundColor or backgroundColor)
                     scrollFrame.write(elem.text)
                 end
             end
@@ -111,7 +117,7 @@ local function new(x, y, w, h, elements, backgroundColor, visible)
             elseif e[1] == "mouse_click" then
                 local dir, mx, my = e[2], e[3], e[4]
                 for i, v in pairs(visibleElements) do
-                    if mx >= v.x and mx <= v.x + string.len(v.text) - 1 and my == v.actualY + 1 then
+                    if mx >= v.x and mx <= v.x + string.len(v.text) - 1 and my == v.actualY + 1 and v.clickEvent ~= nil then
                         v.clickEvent()
                     end
                 end

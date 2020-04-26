@@ -18,23 +18,20 @@ local function loadtable(path)
   return content
 end
 
-print("Welcome to zwm!")
-
-print("loading package list...")
 local packageDirs = loadtable("/boot/package.path")
 for i, v in pairs(packageDirs) do
     package.path = package.path .. ";" .. v
 end
 _G.package = package
-print(package.path)
 
-term.setBackgroundColor(colors.black)
-term.clear()
+local startColors = {r = 76/255, g = 153/255, b = 178/255}
+
 term.setBackgroundColor(colors.cyan)
-for i = 1, h do
-    term.setCursorPos(1, i)
-    term.clearLine()
-    sleep(0.05)
+term.clear()
+
+for i = 0, 1, 0.1 do
+    term.setPaletteColour(colors.cyan, startColors.r * i, startColors.g * i, startColors.b * i)
+    sleep()
 end
 
 local function main()
@@ -425,7 +422,7 @@ local function main()
   drawProcesses()
 
   while true do
-    local e = {os.pullEvent()}
+    local e = {os.pullEventRaw()}
 
     if string.sub(e[1], 1, 6) == "mouse_" and not selectedProcess.minimized then
       local m, x, y = e[2], e[3], e[4]
@@ -575,13 +572,20 @@ local function main()
           title = "Task Manager"
         }))
         drawProcesses()
+      elseif isKeyDown(keys.leftCtrl) and isKeyDown(keys.leftShift) and isKeyDown(keys.c) then
+        wm.selectProcess(wm.createProcess("/bin/shell.lua", {
+          width = 40,
+          height = 15,
+          title = "Shell"
+        }))
+        drawProcesses()
       end
       term.redirect(selectedProcess.window)
       coroutine.resume(selectedProcess.coroutine, table.unpack(e))
     elseif e[1] == "wm_fancyshutdown" then
       term.redirect(native)
       shell.run("/bin/ui/fancyshutdown.lua", e[2])
-    elseif e[1] == "wm_login" then
+    elseif e[1] == "wm_login" or e[1] == "wm_titlebardeath" then
       titlebarID = wm.createProcess("/bin/ui/titlebar.lua", {
         x = 1,
         y = 1,
@@ -592,6 +596,9 @@ local function main()
       })
       wm.selectProcess(titlebarID)
     else
+      if e[1] == "wm_themeupdate" then
+        theme = file.readTable("/etc/colors.cfg")
+      end
       for i, v in pairs(processes) do
         term.redirect(v.window)
         coroutine.resume(v.coroutine, table.unpack(e))
@@ -630,23 +637,30 @@ local function split(inputstr, sep)
 end
 
 local ok, err = xpcall(main, function(err)
-  term.redirect(term.native())
-  term.setCursorPos(1, 3)
-  term.setTextColor(colors.white)
-  term.clear()
-  print("Fatal System Error:", err)
-  local w, h = term.getSize()
-  local tb = split(debug.traceback(), "\n")
-  for i, v in pairs(tb) do
-    if i >= 13 then
-      print("...")
-      return
-    else
-      print(v)
+  local function errorScreen(error)
+    term.redirect(term.native())
+    term.setBackgroundColor(colors.red)
+    term.clear()
+    term.setTextColor(colors.white)
+    term.setCursorPos(2, 2)
+    term.write("System Crash")
+    local w, h = term.getSize()
+    local errorContentWindow = window.create(term.native(), 2, 4, w - 2, h - 3)
+    errorContentWindow.setBackgroundColor(colors.red)
+    errorContentWindow.setTextColor(colors.white)
+    errorContentWindow.clear()
+    term.redirect(errorContentWindow)
+    print(error)
+    term.redirect(term.native())
+    term.setCursorPos(2, h - 1)
+    term.write("Dumping logs...")
+    dumpLogs()
+    for i = 5, 1, -1 do
+      term.setCursorPos(2, h - 1)
+      term.write(("The system will restart in %d second(s)"):format(i))
+      sleep(1)
     end
+    os.reboot()
   end
-  term.setCursorPos(1, 19)
-  read()
-
-  dumpLogs()
+  errorScreen(err)
 end)

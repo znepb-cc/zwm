@@ -2,6 +2,11 @@ dump.log
 *.code-workspace
 recent.cfg
 
+# temporary stuff (here until i finish it)
+updateSysData.lua
+installationVersion.cfg
+installtype.cfg
+
 # Compiled Lua sources
 luac.out
 

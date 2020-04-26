@@ -40,7 +40,9 @@ local function newRead(win, contents, rchar)
     end
 end
 
-local function newTextbox(x, y, w, rchar, placeholderText, contents)
+local function newTextbox(x, y, w, rchar, placeholderText, contents, bg, fg)
+    if not bg then bg = colors.gray end
+    if not fg then fg = colors.lightGray end
     local prevTerm = term.current()
     local win = window.create(prevTerm, x, y, w, 1)
     if not contents then contents = "" end
@@ -49,9 +51,9 @@ local function newTextbox(x, y, w, rchar, placeholderText, contents)
     local obj = {}
 
     obj.redraw = function()
-        win.setBackgroundColor(colors.lightGray)
+        win.setBackgroundColor(bg)
         win.clear()
-        win.setTextColor(colors.gray)
+        win.setTextColor(fg)
         win.setCursorPos(1,1)
         win.write(newContent or contents)
         if contents == "" and placeholderText then

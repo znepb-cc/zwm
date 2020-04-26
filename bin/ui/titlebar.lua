@@ -24,7 +24,7 @@ local ok, err = pcall(function()
 
   local function draw()
     procList = wm.listProcesses()
-    term.setBackgroundColor(colors.gray)
+    term.setBackgroundColor(theme.menu.background)
     term.clear()
     drawTime()
     term.setCursorPos(1,1)
@@ -84,6 +84,7 @@ local ok, err = pcall(function()
           end
         else
           local pid
+          pid = nil -- just in case...
           for i, v in pairs(running) do
             if x >= v.startX and x <= v.endX then
               pid = v.pid
@@ -97,6 +98,8 @@ local ok, err = pcall(function()
             wm.selectProcess(pid)
           end
         end
+      elseif e[1] == "wm_themeupdate" then
+        theme = file.readTable("/etc/colors.cfg")
       end
     end
   end
@@ -111,5 +114,4 @@ local ok, err = pcall(function()
   parallel.waitForAll(time, event)
 end)
 
-print(tostring(ok) .. " " .. err)
-sleep(1000)
+if not ok then os.queueEvent("wm_titlebardeath") end

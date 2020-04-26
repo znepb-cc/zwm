@@ -3,8 +3,9 @@ local util = require('/lib/util')
 local sha256 = require("/lib/sha256")
 local file = util.loadModule("file")
 local w, h = term.getSize()
-local username = textbox.new(2, 2, w - 2, nil, "Username")
-local password = textbox.new(2, 4, w - 2, "\7", "Password")
+local theme = file.readTable("/etc/colors.cfg")
+local username = textbox.new(2, 2, w - 2, nil, "Username", nil, theme.userInput.background, theme.userInput.text)
+local password = textbox.new(2, 4, w - 2, "\7", "Password", nil, theme.userInput.background, theme.userInput.text)
 
 local logins = file.readTable("/etc/accounts.cfg")
 
@@ -14,48 +15,48 @@ local errorText = ""
 
 local function draw()
     local w, h = term.getSize()
-    term.setBackgroundColor(colors.white)
+    term.setBackgroundColor(theme.main.background)
     term.clear()
     username.redraw()
     password.redraw()
     term.setCursorPos(2,6)
-    term.setBackgroundColor(colors.lightGray)
-    term.setTextColor(colors.gray)
+    term.setBackgroundColor(theme.userInput.background)
+    term.setTextColor(theme.userInput.text)
     term.write(" Login ")
     term.setCursorPos(10, 6)
-    term.setBackgroundColor(colors.white)
+    term.setBackgroundColor(theme.main.background)
     term.setTextColor(colors.red)
     term.write(errorText)
 
-    local foregroundColor = colors.lightGray
+    local foregroundColor = theme.window.titlebar.background
 
     if wm.getSelectedProcessID() == id then
-        foregroundColor = colors.lightBlue
+        foregroundColor = theme.window.titlebar.backgroundSelected
     end
 
     for i = 1, h - 1 do
         term.setCursorPos(1, i)
         term.setTextColor(foregroundColor)
-        term.setBackgroundColor(colors.white)
+        term.setBackgroundColor(theme.main.background)
         term.write("\149")
     end
     for i = 1, h - 1 do
         term.setCursorPos(w, i)
-        term.setTextColor(colors.white)
+        term.setTextColor(theme.main.background)
         term.setBackgroundColor(foregroundColor)
         term.write("\149")
     end
     term.setCursorPos(2, h)
-    term.setTextColor(colors.white)
+    term.setTextColor(theme.main.background)
     term.setBackgroundColor(foregroundColor)
     term.write(string.rep("\143", w - 2))
 
     term.setCursorPos(1, h)
-    term.setTextColor(colors.white)
+    term.setTextColor(theme.main.background)
     term.setBackgroundColor(foregroundColor)
     term.write("\138")
     term.setCursorPos(w, h)
-    term.setTextColor(colors.white)
+    term.setTextColor(theme.main.background)
     term.setBackgroundColor(foregroundColor)
     term.write("\133")
 end

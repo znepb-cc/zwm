@@ -1,3 +1,7 @@
+local util = require("util")
+local file = util.loadModule("file")
+local theme = file.readTable("/etc/colors.cfg")
+
 local function centerText(text, y, offset)
     if not offset then offset = 0 end
     local w, h = term.getSize()
@@ -11,10 +15,10 @@ local function draw()
     local w, h = term.getSize()
 
     -- border
-    local foregroundColor = colors.lightGray
+    local foregroundColor = theme.window.titlebar.background
 
     if wm.getSelectedProcessID() == id then
-        foregroundColor = colors.lightBlue
+        foregroundColor = theme.window.titlebar.backgroundSelected
     end
     
     for i = 2, h - 1 do
