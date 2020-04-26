@@ -19,6 +19,7 @@
     files = {
         "/bin/ui/fancyshutdown.lua",
         "/bin/ui/login.lua",
+        "/bin/ui/about.lua",
         "/bin/ui/menu.lua",
         "/bin/ui/run.lua",
         "/bin/ui/shutdown.lua",
