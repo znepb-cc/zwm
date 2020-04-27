@@ -19,7 +19,7 @@
     },
     files = {
         "/bin/themes/classic.theme",
-        "/bin/themes/dark.theme"
+        "/bin/themes/dark.theme",
         "/bin/ui/fancyshutdown.lua",
         "/bin/ui/login.lua",
         "/bin/ui/menu.lua",
