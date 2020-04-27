@@ -4,7 +4,7 @@ local rootPath
 local args = { ... }
 
 local function getFile(name)
-    local file, second = http.get(rootPath .. name)
+    local file, second = http.get(rootPath .. name .. "?" .. os.epoch('utc'))
     local content
     if file then
         content = file.readAll()
