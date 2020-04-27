@@ -45,6 +45,8 @@
         "/lib/nfte.lua",
         "/lib/sha256.lua",
         "/lib/textbox.lua",
+        "/lib/scrollwindow.lua",
+        "/lib/draw.lua",
         "/startup.lua"
     }
 }
