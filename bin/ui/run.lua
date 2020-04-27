@@ -3,7 +3,7 @@ local w, h = term.getSize()
 local box = textbox.new(2, 4, w - 2)
 local util = require("util")
 local file = util.loadModule("file")
-local theme = file.readTable("/etc/colors.cfg")
+local theme = _G.wm.getTheme()
 
 local function draw()
     local w, h = term.getSize()

@@ -3,7 +3,7 @@ local util = require('/lib/util')
 local sha256 = require("/lib/sha256")
 local file = util.loadModule("file")
 local w, h = term.getSize()
-local theme = file.readTable("/etc/colors.cfg")
+local theme = _G.wm.getTheme()
 local username = textbox.new(2, 2, w - 2, nil, "Username", nil, theme.userInput.background, theme.userInput.text)
 local password = textbox.new(2, 4, w - 2, "\7", "Password", nil, theme.userInput.background, theme.userInput.text)
 

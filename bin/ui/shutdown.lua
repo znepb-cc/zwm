@@ -1,6 +1,6 @@
 local util = require("util")
 local file = util.loadModule("file")
-local theme = file.readTable("/etc/colors.cfg")
+local theme = _G.wm.getTheme()
 
 local function centerText(text, y, offset)
     if not offset then offset = 0 end

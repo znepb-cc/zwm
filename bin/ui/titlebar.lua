@@ -8,7 +8,7 @@ local ok, err = pcall(function()
   local util = require("/lib/util")
   local nfte = require("/lib/nfte")
   local file = util.loadModule("file")
-  local theme = file.readTable("/etc/colors.cfg")
+  local theme = _G.wm.getTheme()
   local wm = _G.wm
 
   for i, v in pairs(_G) do

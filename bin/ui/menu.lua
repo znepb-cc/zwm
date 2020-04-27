@@ -10,7 +10,7 @@ local scroll = require("/lib/scrollwindow")
 local draw = require("/lib/draw")
 
 local file = util.loadModule("file")
-local theme = file.readTable("/etc/colors.cfg")
+local theme = _G.wm.getTheme()
 
 local search = textbox.new(3, h - 1, w - 7, nil, "Search", nil, theme.userInput.background, theme.userInput.text)
 local searchWindow = scroll.new(2, 2, w - 3, h - 4, {}, theme.menu.background, false)

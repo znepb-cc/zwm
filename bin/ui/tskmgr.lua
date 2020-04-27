@@ -3,7 +3,7 @@ local procList
 
 local util = require("/lib/util")
 local file = util.loadModule("file")
-local theme = file.readTable("/etc/colors.cfg")
+local theme = _G.wm.getTheme()
 local wm = _G.wm
 
 local function draw()
@@ -12,7 +12,7 @@ local function draw()
   term.clear()
   term.setTextColor(theme.menu.text)
   term.setCursorPos(2,1)
-  term.setBackgroundColor(theme.window.titlebar.backgroundSelected)
+  term.setBackgroundColor(theme.menu.background)
   term.clearLine()
   term.write("New task")
   term.setCursorPos(2,2)

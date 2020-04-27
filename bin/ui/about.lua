@@ -1,6 +1,6 @@
 local util = require("util")
 local file = util.loadModule("file")
-local theme = file.readTable("/etc/colors.cfg")
+local theme = _G.wm.getTheme()
 local sw = require("/lib/scrollwindow")
 local w, h = term.getSize()
 local elements = {

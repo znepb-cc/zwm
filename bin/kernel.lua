@@ -53,10 +53,17 @@ local function main()
 
   local util = require("util")
   local file = util.loadModule("file")
-  local theme = file.readTable("/etc/colors.cfg")
+
   local serviceWindow = window.create(native, 1, 1, 1, 1, false)
 
   local top = 0
+
+  function wm.getTheme()
+    local themePath = file.readTable("/etc/theme.cfg").currentTheme
+    return file.readTable(themePath)
+  end
+
+  local theme = wm.getTheme()
 
   local function updateProcesses()
     for i, v in pairs(processes) do
@@ -296,7 +303,7 @@ local function main()
       if settings.title:sub(-4) == ".lua" then
         settings.title = settings.title:sub(1, -5)
       end
-    elseif type(path) ~= "string" then
+    elseif type(path) ~= "string" and not settings.title then
       settings.title = "Untitled"
     end
 
