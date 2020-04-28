@@ -1,3 +1,3 @@
 {
-    version = {20, 18s}
+    version = {20, 18}
 }
