@@ -1,10 +1,10 @@
 {
     release = {20, 18},
-    releaseType = "release",
+    releaseType = "development",
     spaceRequirement = 108000,
     releaseDate = {
-        m = 4,
-        d = 27,
+        m = 5,
+        d = 1,
         y = 2020
     },
     directories = {

@@ -35,36 +35,56 @@ for i = 0, 1, 0.1 do
 end
 
 local function main()
+  --[[
+    20.19 TODO:
+
+    Add services
+    Make titlebar & menu embedded into kernel (so they can't be stopped/started by tskmgr)
+    Notification center
+    Added Do Not Disturb to settings
+  ]] 
+  -- Process variables
   local processes = {}
   local selectedProcessID = 0
   local selectedProcess
   local lastProcID = 0
+
+  -- Terminal variables
   local native = term.current()
   local wm = {}
   local w, h = term.getSize()
-  local titlebarID = 0
   local keysDown = {}
 
+  -- Notification variables
+  local notifications = {}
+  local notificationCenter = {}
+  local doNotDisturbEnabled = false
+
+  -- Window movement 
   local resizeStartX
   local resizeStartY
   local resizeStartW
   local resizeStartH
   local mvmtX = nil
 
+  -- APIs
   local util = require("util")
   local file = util.loadModule("file")
+  local draw = require("draw")
 
-  local serviceWindow = window.create(native, 1, 1, 1, 1, false)
-
+  -- Other variables
   local top = 0
+  local titlebarID = 0
 
   function wm.getTheme()
     local themePath = file.readTable("/etc/theme.cfg").currentTheme
     return file.readTable(themePath)
   end
 
+  -- Theme
   local theme = wm.getTheme()
 
+  -- Process drawing
   local function updateProcesses()
     for i, v in pairs(processes) do
       term.redirect(v.window)
@@ -155,6 +175,114 @@ local function main()
     end
   end
 
+  local function drawNotifications()
+    if not doNotDisturbEnabled then
+      local prevCurorPosX, prevCurorPosY = term.getCursorPos()
+      local prevTextColor = term.getTextColor()
+      local prevTerm = term.current()
+      term.redirect(native)
+      local notiY = h + 1
+      for i, v in pairs(notifications) do
+        local length = 16
+
+        -- Text formatting
+        -- Break down string into a list of words
+        local words = {}
+        local word = ""
+
+        for i = 1, #v.content do
+          if string.sub(v.content, i, i) == " " then
+            table.insert(words, word)
+            word = ""
+          else
+            word = word .. string.sub(v.content, i, i)
+          end
+        end
+        if word ~= "" then table.insert(words, word)end
+        -- Piece together these words to make a line of text
+        local lines = {}
+        local line = ""
+
+        for wordNumber, word in pairs(words) do
+          if string.len(word) + #line < length then
+            if line == "" then
+              line = word
+            else
+              line = line .. " " .. word
+            end
+          else
+            table.insert(lines, line)
+            line = word
+          end
+        end
+        if line ~= "" then table.insert(lines, line) end
+
+        local x, y = w - 20, nil
+        notiY = notiY - (#lines + 4) - 1
+        y = notiY
+        paintutils.drawFilledBox(x, y, w, y + #lines + 3, colors.white)
+
+        -- Draw modal border
+        term.setCursorPos(x + 1, y + #lines + 3)
+        term.setBackgroundColor(colors.lightGray)
+        term.setTextColor(colors.white)
+        term.write(string.rep("\143",  19))
+        term.setCursorPos(x, y + #lines + 3)
+        term.write("\138")
+
+        term.setBackgroundColor(colors.white)
+        term.setTextColor(colors.lightGray)
+        term.setCursorPos(x + 1, y)
+        term.write(string.rep("\131",  19))
+        term.setCursorPos(x, y)
+        term.write("\151")
+        for i = 1, #lines + 2 do
+          term.setCursorPos(x, y + i)
+          term.write("\149")
+        end
+        term.setCursorPos(w, y)
+        term.write("\129")
+        term.setCursorPos(w, y + #lines + 3)
+        term.write("\144")
+
+        term.setCursorPos(w, #lines + 2)
+
+        term.setCursorPos(x + 1, y + 1)
+        term.setTextColor(colors.black)
+        draw.overflowWrite(v.title, 19)
+        term.setCursorPos(w - 1, y + 1)
+        term.write("×")
+
+        if v.type then
+          term.setTextColor(colors.gray)
+          for i, line in pairs(lines) do
+            term.setCursorPos(x + 3, y + 2 + i)
+            term.write(line)
+          end
+
+          if v.type == "info" then
+            term.setCursorPos(x + 1, y + 3)
+            term.setTextColor(colors.blue)
+            term.write('i')
+          elseif v.type == "warning" then
+            term.setCursorPos(x + 1, y + 3)
+            term.setTextColor(colors.orange)
+            term.write('!')
+          elseif v.type == "error" then
+            term.setCursorPos(x + 1, y + 3)
+            term.setTextColor(colors.red)
+            term.write('\215')
+          end
+        end
+        v.closePosX = w - 1
+        v.closePosY = y + 1
+      end
+      term.redirect(prevTerm)
+      term.setTextColor(prevTextColor)
+      term.setCursorPos(prevCurorPosX, prevCurorPosY)
+    end
+  end
+
   local function drawProcesses()
     term.redirect(native)
     term.setBackgroundColor(theme.desktop.background)
@@ -181,8 +309,8 @@ local function main()
         end
       end
     end
-    drawProcess(selectedProcess)
     updateProcesses()
+    drawNotifications()
   end
 
   function wm.selectProcess(pid)
@@ -214,6 +342,16 @@ local function main()
 
   function wm.getSelectedProcessID()
     return selectedProcessID
+  end
+
+  function wm.pushNotification(title, desc, type)
+    table.insert(notifications, 1, {
+      title = title,
+      content = desc,
+      type = type
+    })
+    table.insert(notificationCenter, notifications[1])
+    drawProcesses()
   end
 
   function wm.endProcess(pid)
@@ -377,40 +515,9 @@ local function main()
     return lastProcID
   end
 
-  function wm.createService(path)
-    lastProcID  = lastProcID + 1
-    local function run() end
-    local ins = {}
-    if type(path) == "string" then
-      run = function()
-        _G.require = require
-        _G.wm = wm
-        _G.id = lastProcID
-        _G.table = newTable
-        _G.shell = shell
-
-        os.run({
-          _G = _G,
-          package = package
-        }, path)
-        sleep(1000)
-      end
-    elseif type(path) == "function" then
-      log("running as func")
-      run = function()
-        local wm = wm
-        local id = lastProcID
-        local table = newTable
-        local textbox = textbox
-
-        path(textbox)
-      end
-    end
-
-    ins.coroutine = coroutine.create(run)
-    ins.window = serviceWindow
-    return lastProcID
-  end
+  --[[function wm.createService(path) -- TODO: Write services
+    
+  end]]
 
   local loginID = wm.createProcess("/bin/ui/login.lua", {
     showTitlebar = true,
@@ -421,10 +528,6 @@ local function main()
     y =  (h / 2) - 4
   })
   wm.selectProcess(loginID)
-  wm.createService(function()
-    sleep(5)
-    os.reboot()
-  end)
 
   drawProcesses()
 
@@ -433,8 +536,16 @@ local function main()
 
     if string.sub(e[1], 1, 6) == "mouse_" and not selectedProcess.minimized then
       local m, x, y = e[2], e[3], e[4]
+      -- Notification hide
+      if e[1] == "mouse_click" then
+        for i, noti in pairs(notifications) do
+          if noti.closePosX == x and noti.closePosY == y then
+            notifications[i] = nil
+            drawProcesses()
+          end
+        end
       -- Resize checking
-      if resizeStartX ~= nil and m == 2 then
+      elseif resizeStartX ~= nil and m == 2 then
         log(e[1])
         if e[1] == "mouse_up" then 
           resizeStartX = nil
@@ -627,6 +738,7 @@ local function main()
       wm.selectProcess(titlebarID or 1)
     else
       drawProcess(selectedProcess)
+      drawNotifications()
     end
     log(tostring(selectedProcess.minimized))
   end
