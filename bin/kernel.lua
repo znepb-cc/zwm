@@ -537,15 +537,16 @@ local function main()
     if string.sub(e[1], 1, 6) == "mouse_" and not selectedProcess.minimized then
       local m, x, y = e[2], e[3], e[4]
       -- Notification hide
-      if e[1] == "mouse_click" then
+      if e[1] == "mouse_click" and #notifications > 0 then
         for i, noti in pairs(notifications) do
           if noti.closePosX == x and noti.closePosY == y then
             notifications[i] = nil
             drawProcesses()
           end
         end
+      end
       -- Resize checking
-      elseif resizeStartX ~= nil and m == 2 then
+      if resizeStartX ~= nil and m == 2 then
         log(e[1])
         if e[1] == "mouse_up" then 
           resizeStartX = nil
