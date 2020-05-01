@@ -714,6 +714,9 @@ local function main()
         dontShowInTitlebar = true
       })
       wm.selectProcess(titlebarID)
+      if e[1] == "wm_login" then
+        wm.currentUser = e[2]
+      end
     else
       if e[1] == "wm_themeupdate" then
         theme = file.readTable("/etc/colors.cfg")

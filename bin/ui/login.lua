@@ -78,7 +78,7 @@ while true do
             local found = false
             for i, v in pairs(logins) do
                 if sha256(pswrdRaw) == v.passwordHash and v.name == usrRaw then
-                    os.queueEvent("wm_login")
+                    os.queueEvent("wm_login", usrRaw)
                     found = true
                     wm.endProcess(id)
                 end
