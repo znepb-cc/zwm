@@ -37,20 +37,20 @@ while true do
     local function drawInput()
         if input ~= "" then
             completionList = {}
-            if shell.complete(input)[1] then
+            if shell.complete(input) and shell.complete(input)[1] then
                 completion = shell.complete(input)[1]
-            elseif shell.completeProgram(input)[1] then
+            elseif shell.completeProgram(input) and shell.completeProgram(input)[1] then
                 completion = shell.completeProgram(input)[1]
             else
                 completion = ""
             end
 
-            if shell.complete(input)[completionIndex] then
+            if shell.complete(input) and shell.complete(input)[completionIndex] then
                 for i, v in pairs({shell.complete(input)}) do
                     table.insert(completionList, v)
                 end
             end
-            if shell.completeProgram(input)[completionIndex] then
+            if shell.completeProgram(input) and shell.completeProgram(input)[completionIndex] then
                 for i, v in pairs({shell.completeProgram(input)}) do
                     table.insert(completionList, v)
                 end
