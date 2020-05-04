@@ -579,7 +579,7 @@ local function main()
           drawProcesses()
         end
       -- Max window controls
-      elseif selectedProcess.maximazed == true and y == 2 then 
+      elseif not e[1] == "mouse_move" and selectedProcess.maximazed == true and y == 2 then 
         if not selectedProcess.disableControls and x == 1 and e[1] == "mouse_click" then
           wm.endProcess(selectedProcessID)
           drawProcesses()
@@ -593,7 +593,7 @@ local function main()
           drawProcesses()
         end
       -- Window movement 
-      elseif not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x - 1 and x <= selectedProcess.x + selectedProcess.width and y >= selectedProcess.y - 1  and y <= selectedProcess.y + 1 and e[1] == "mouse_drag" or e[1] == "mouse_up" and mvmtX ~= nil then
+      elseif not e[1] == "mouse_move" and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x - 1 and x <= selectedProcess.x + selectedProcess.width and y >= selectedProcess.y - 1  and y <= selectedProcess.y + 1 and e[1] == "mouse_drag" or e[1] == "mouse_up" and mvmtX ~= nil then
         if e[1] == "mouse_drag" and mvmtX then
           selectedProcess.x = x - mvmtX + 1
           selectedProcess.y = y
@@ -601,7 +601,7 @@ local function main()
         else
           mvmtX = nil
         end
-      elseif not selectedProcess.disallowResizing and x == selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y + selectedProcess.height and m == 2 then
+      elseif not e[1] == "mouse_move" and not selectedProcess.disallowResizing and x == selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y + selectedProcess.height and m == 2 then
         if e[1] == "mouse_click" then
           resizeStartX = x
           resizeStartY = y
