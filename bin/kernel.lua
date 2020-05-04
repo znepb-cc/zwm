@@ -562,7 +562,7 @@ local function main()
           drawProcesses()
         end
       -- Moving windows & x and max / min buttons
-      elseif not selectedProcess.minimized and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y and e[1] == "mouse_click" and mvmtX == nil then
+      elseif not e[1] == "mouse_move" and not selectedProcess.minimized and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y and e[1] == "mouse_click" and mvmtX == nil then
         if not selectedProcess.disableControls and x == selectedProcess.x and e[1] == "mouse_click" then
           wm.endProcess(selectedProcessID)
           drawProcesses()
