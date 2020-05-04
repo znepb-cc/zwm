@@ -610,7 +610,7 @@ local function main()
           log("resize start")
         end
       -- Passing events (not maximazed)
-      elseif not selectedProcess.maximazed and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y >= selectedProcess.y and y <= selectedProcess.y + selectedProcess.height - 1 then
+      elseif not e[1] == "mouse_move" and not selectedProcess.maximazed and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y >= selectedProcess.y and y <= selectedProcess.y + selectedProcess.height - 1 then
         term.redirect(selectedProcess.window)
         local pass = {}
         if e[1] == "mouse_move" and x == nil then
