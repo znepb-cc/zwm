@@ -633,6 +633,7 @@ local function main()
               x - selectedProcess.x + 1,
               y - selectedProcess.y + 1
             }
+          end
         end
         coroutine.resume(selectedProcess.coroutine, table.unpack(pass))
       -- Passing events (maximazed)
@@ -659,6 +660,7 @@ local function main()
               x,
               y - 1
             }
+          end
         end
         coroutine.resume(selectedProcess.coroutine, table.unpack(pass))
       elseif e[1] == "mouse_click" then
