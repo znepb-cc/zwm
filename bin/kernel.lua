@@ -613,40 +613,52 @@ local function main()
       elseif not selectedProcess.maximazed and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y >= selectedProcess.y and y <= selectedProcess.y + selectedProcess.height - 1 then
         term.redirect(selectedProcess.window)
         local pass = {}
-        if selectedProcess.showTitlebar == true then
+        if e[1] == "mouse_move" and x == nil then
           pass = {
             e[1],
-            m,
-            x - selectedProcess.x + 1,
-            y - selectedProcess.y
+            m
           }
         else
-          pass = {
-            e[1],
-            m,
-            x - selectedProcess.x + 1,
-            y - selectedProcess.y + 1
-          }
+          if selectedProcess.showTitlebar == true then
+            pass = {
+              e[1],
+              m,
+              x - selectedProcess.x + 1,
+              y - selectedProcess.y
+            }
+          else
+            pass = {
+              e[1],
+              m,
+              x - selectedProcess.x + 1,
+              y - selectedProcess.y + 1
+            }
         end
         coroutine.resume(selectedProcess.coroutine, table.unpack(pass))
       -- Passing events (maximazed)
       elseif selectedProcess.maximazed and y > 2 then
         term.redirect(selectedProcess.window)
         local pass = {}
-        if selectedProcess.showTitlebar == true then
+        if e[1] == "mouse_move" and x == nil then
           pass = {
             e[1],
-            m,
-            x,
-            y - 2
+            m
           }
         else
-          pass = {
-            e[1],
-            m,
-            x,
-            y - 1
-          }
+          if selectedProcess.showTitlebar == true then
+            pass = {
+              e[1],
+              m,
+              x,
+              y - 2
+            }
+          else
+            pass = {
+              e[1],
+              m,
+              x,
+              y - 1
+            }
         end
         coroutine.resume(selectedProcess.coroutine, table.unpack(pass))
       elseif e[1] == "mouse_click" then
