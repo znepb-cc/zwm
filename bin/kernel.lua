@@ -546,8 +546,10 @@ local function main()
         end
       end
       -- Resize checking
+
+      if e[1] == "mouse_click" then
+      end
       if resizeStartX ~= nil and m == 2 then
-        log(e[1])
         if e[1] == "mouse_up" then 
           resizeStartX = nil
           resizeStartY = nil
@@ -562,7 +564,7 @@ local function main()
           drawProcesses()
         end
       -- Moving windows & x and max / min buttons
-      elseif not e[1] == "mouse_move" and not selectedProcess.minimized and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y and e[1] == "mouse_click" and mvmtX == nil then
+      elseif e[1] ~= "mouse_move" and not selectedProcess.minimized and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y and e[1] == "mouse_click" and mvmtX == nil then
         if not selectedProcess.disableControls and x == selectedProcess.x and e[1] == "mouse_click" then
           wm.endProcess(selectedProcessID)
           drawProcesses()
@@ -579,7 +581,7 @@ local function main()
           drawProcesses()
         end
       -- Max window controls
-      elseif not e[1] == "mouse_move" and selectedProcess.maximazed == true and y == 2 then 
+      elseif e[1] ~= "mouse_move" and selectedProcess.maximazed == true and y == 2 then 
         if not selectedProcess.disableControls and x == 1 and e[1] == "mouse_click" then
           wm.endProcess(selectedProcessID)
           drawProcesses()
@@ -593,7 +595,7 @@ local function main()
           drawProcesses()
         end
       -- Window movement 
-      elseif not e[1] == "mouse_move" and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x - 1 and x <= selectedProcess.x + selectedProcess.width and y >= selectedProcess.y - 1  and y <= selectedProcess.y + 1 and e[1] == "mouse_drag" or e[1] == "mouse_up" and mvmtX ~= nil then
+      elseif e[1] ~= "mouse_move" and not selectedProcess.maximazed and selectedProcess.showTitlebar and x >= selectedProcess.x - 1 and x <= selectedProcess.x + selectedProcess.width and y >= selectedProcess.y - 1  and y <= selectedProcess.y + 1 and e[1] == "mouse_drag" or e[1] == "mouse_up" and mvmtX ~= nil then
         if e[1] == "mouse_drag" and mvmtX then
           selectedProcess.x = x - mvmtX + 1
           selectedProcess.y = y
@@ -601,7 +603,7 @@ local function main()
         else
           mvmtX = nil
         end
-      elseif not e[1] == "mouse_move" and not selectedProcess.disallowResizing and x == selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y + selectedProcess.height and m == 2 then
+      elseif e[1] ~= "mouse_move" and not selectedProcess.disallowResizing and x == selectedProcess.x + selectedProcess.width - 1 and y == selectedProcess.y + selectedProcess.height and m == 2 then
         if e[1] == "mouse_click" then
           resizeStartX = x
           resizeStartY = y
@@ -610,7 +612,7 @@ local function main()
           log("resize start")
         end
       -- Passing events (not maximazed)
-      elseif not e[1] == "mouse_move" and not selectedProcess.maximazed and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y >= selectedProcess.y and y <= selectedProcess.y + selectedProcess.height - 1 then
+      elseif e[1] ~= "mouse_move" and not selectedProcess.maximazed and x >= selectedProcess.x and x <= selectedProcess.x + selectedProcess.width - 1 and y >= selectedProcess.y and y <= selectedProcess.y + selectedProcess.height - 1 then
         term.redirect(selectedProcess.window)
         local pass = {}
         if e[1] == "mouse_move" and x == nil then
@@ -637,7 +639,7 @@ local function main()
         end
         coroutine.resume(selectedProcess.coroutine, table.unpack(pass))
       -- Passing events (maximazed)
-      elseif selectedProcess.maximazed and y > 2 then
+      elseif e[1] ~= "mouse_move" and selectedProcess.maximazed and y > 2 then
         term.redirect(selectedProcess.window)
         local pass = {}
         if e[1] == "mouse_move" and x == nil then
@@ -773,7 +775,32 @@ local function split(inputstr, sep)
   return t
 end
 
-local ok, err = xpcall(main, function(err)
+local oTerm = term.current()
+local nTerm = window.create(term.current(),1,1,term.getSize())
+nTerm.setVisible(false)
+term.redirect(nTerm)
+local function render()
+    local w,h = nTerm.getSize()
+    while true do
+        for t=0,15,1 do
+            oTerm.setPaletteColor(2^t,table.unpack({nTerm.getPaletteColor(2^t)}))
+        end
+        local ocursor = {nTerm.getCursorPos()}
+        local otext = nTerm.getCursorBlink()
+        oTerm.setCursorBlink(false)
+        for t=1,h do
+            oTerm.setCursorPos(1,t)
+            oTerm.blit(nTerm.getLine(t))
+        end
+        oTerm.setCursorBlink(otext)
+        oTerm.setCursorPos(table.unpack(ocursor))
+        os.sleep(0)
+    end
+end
+
+local ok, err = xpcall(function() 
+  parallel.waitForAny(main, render) 
+end, function(err)
   local function errorScreen(error)
     term.redirect(term.native())
     term.setBackgroundColor(colors.red)
